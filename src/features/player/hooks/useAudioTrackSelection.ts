@@ -20,7 +20,7 @@ export function useAudioTrackSelection({
     (shaka.extern.AudioTrack & { key: string })[]
   >([]);
   const [selectedAudioTrackIndex, setSelectedAudioTrackIndex] =
-    useState<number>();
+    useState<number>(0);
 
   useEffect(() => {
     if (!player) {
@@ -35,7 +35,7 @@ export function useAudioTrackSelection({
 
     const onUnloading = () => {
       setAudioTracks([]);
-      setSelectedAudioTrackIndex(undefined);
+      setSelectedAudioTrackIndex(0);
     };
 
     player.addEventListener('trackschanged', onTracksChanged);
@@ -71,7 +71,7 @@ export function useAudioTrackSelection({
   };
 
   const navigateAudioTracks = (direction: -1 | 1) => {
-    if (audioTracks.length <= 1 || selectedAudioTrackIndex === undefined) {
+    if (audioTracks.length <= 1) {
       return;
     }
 

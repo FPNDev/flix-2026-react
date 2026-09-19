@@ -1,4 +1,4 @@
-import { useEffect, useEffectEvent, useState } from 'react';
+import { useState } from 'react';
 import classes from './Player.module.scss';
 import clsx from 'clsx';
 import { useShakaPlayer } from '../../hooks/useShakaPlayer';
@@ -11,8 +11,11 @@ import { GiB } from '@/constants/filesize';
 import { Icon } from '@/components/DesignSystem/Icon';
 import { useCurrentVideoTrack } from '../../hooks/useCurrentVideoTrack';
 import { Row } from '@/components/DesignSystem/Layout';
+import { useToast } from '@/components/DesignSystem/Toast';
 
 export function Player() {
+  const { addToast } = useToast();
+
   const [video, setVideo] = useState<HTMLVideoElement>();
   const [playerContainer, setPlayerContainer] = useState<HTMLElement>();
 
@@ -33,6 +36,7 @@ export function Player() {
   } = useShakaPlayer({ video });
 
   const {
+    activeURI,
     files,
     selectedFileIndex,
     setSelectedFileIndex,
@@ -59,7 +63,7 @@ export function Player() {
   useAutoplayNextEpisode({
     video,
     files,
-    navigateFiles: navigateFiles,
+    navigateFiles,
   });
   usePlayerControlKeys({
     video,
@@ -69,29 +73,42 @@ export function Player() {
     navigateAudioTracks,
   });
 
-  const submitForm = () => {
+  const focusPlayer = () => {
     if (!playerContainer) {
       return;
     }
 
-    prepareAndPlay();
     playerContainer.focus();
   };
 
-  const focusVideo = useEffectEvent(() => {
-    playerContainer?.focus();
-  });
+  const submitForm = (ev: React.SubmitEvent) => {
+    ev.preventDefault();
+    focusPlayer();
 
-  useEffect(() => {
-    if (
-      selectedAudioTrackIndex === undefined ||
-      selectedFileIndex === undefined
-    ) {
+    if (activeURI === magnetURI) {
+      const fileName = files.length ? files[selectedFileIndex].name : magnetURI;
+      addToast({
+        icon: 'playlist_remove',
+        text: `Already playing ` + fileName,
+        variant: 'danger',
+      });
       return;
     }
 
-    focusVideo();
-  }, [selectedFileIndex, selectedAudioTrackIndex]);
+    prepareAndPlay();
+  };
+
+  const onAudioTrackIndexChanged = (
+    ev: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    selectAudioTrack(+ev.target.value);
+    focusPlayer();
+  };
+
+  const onFileIndexChanged = (ev: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedFileIndex(+ev.target.value);
+    focusPlayer();
+  };
 
   return (
     <div className={classes.container}>
@@ -104,7 +121,7 @@ export function Player() {
       </div>
       <form
         className={clsx(classes.controlForm, 't-body-lg')}
-        action={submitForm}
+        onSubmit={submitForm}
       >
         <input
           name="magnetURI"
@@ -117,7 +134,7 @@ export function Player() {
           <select
             name="fileIndex"
             value={selectedFileIndex}
-            onChange={(ev) => setSelectedFileIndex(+ev.target.value)}
+            onChange={onFileIndexChanged}
           >
             <option hidden>Select File</option>
             {files.map((file, index) => (
@@ -130,7 +147,7 @@ export function Player() {
           <select
             name="audioTrackIndex"
             value={selectedAudioTrackIndex}
-            onChange={(ev) => selectAudioTrack(+ev.target.value)}
+            onChange={onAudioTrackIndexChanged}
           >
             <option hidden>Select Audio Track</option>
             {audioTracks.map((audioTrack, index) => (

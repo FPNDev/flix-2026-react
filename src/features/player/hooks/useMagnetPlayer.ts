@@ -88,16 +88,19 @@ export function useMagnetPlayer({
   // Set player active URL and start fetching files
   const prepareAndPlay = () => {
     setActiveURI(magnetURI);
+  };
+
+  useEffect(() => {
     if (multiple) {
-      fetchFiles(magnetURI);
+      fetchFiles(activeURI);
     } else {
       addToast({
         icon: 'playlist_play',
-        text: 'Playing ' + magnetURI,
+        text: 'Playing ' + activeURI,
         variant: 'success',
       });
     }
-  };
+  }, [activeURI, multiple, addToast, fetchFiles]);
 
   // Handle file navigation
   useEffect(() => {
@@ -106,15 +109,17 @@ export function useMagnetPlayer({
     }
 
     playerQueue.add(() => player.unload());
-    if (!activeURI || selectedFileIndex === undefined) {
+    if (!activeURI) {
       return;
     }
+
     playSelectedFile();
-  }, [player, playerQueue, selectedFileIndex, activeURI, playSelectedFile]);
+  }, [player, playerQueue, activeURI, playSelectedFile]);
 
   // Update current video track when it changes
 
   return {
+    activeURI,
     files,
     selectedFileIndex,
     setSelectedFileIndex,

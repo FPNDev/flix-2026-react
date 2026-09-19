@@ -11,13 +11,13 @@ export function useVideoFileSelection() {
   const { addToast } = useToast();
 
   const [files, setFiles] = useState<MediaFile[]>([]);
-  const [selectedFileIndex, setSelectedFileIndex] = useState<number>();
+  const [selectedFileIndex, setSelectedFileIndex] = useState<number>(0);
 
   const abortRef = useRef<AbortController>(null);
 
   const fetchFiles = async (magnetURI: string) => {
     setFiles([]);
-    setSelectedFileIndex(undefined);
+    setSelectedFileIndex(0);
 
     if (!magnetURI) {
       return;
@@ -31,7 +31,6 @@ export function useVideoFileSelection() {
       const playableFiles = data.files.filter((file) => file.playable);
 
       setFiles(playableFiles);
-      setSelectedFileIndex(0);
 
       if (!playableFiles.length) {
         addToast({
@@ -58,15 +57,12 @@ export function useVideoFileSelection() {
     }
 
     setSelectedFileIndex((prevIndex) => {
-      if (prevIndex === undefined) {
-        return;
-      }
       return Math.max(0, Math.min(files.length - 1, prevIndex + direction));
     });
   };
 
   useEffect(() => {
-    if (selectedFileIndex === undefined || !files.length) {
+    if (!files.length) {
       return;
     }
 

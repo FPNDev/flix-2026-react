@@ -84,7 +84,7 @@
 }
 
 // a hit area that stays thumb-sized however small the visual box is
-@mixin touch-target($size: $touch-min) {
+@mixin touch-target($size: var(--touch-min)) {
   position: relative;
   &::after {
     content: '';
