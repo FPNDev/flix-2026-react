@@ -23,6 +23,8 @@
   flex: none;
   user-select: none;
   -webkit-font-smoothing: antialiased;
+  writing-mode: horizontal-tb;
+
   @include icon-axes;
 
   &.fill {
