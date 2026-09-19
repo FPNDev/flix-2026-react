@@ -1,0 +1,111 @@
+@use 'sass:map';
+@use 'breakpoints' as *;
+
+@mixin on-hover {
+  &:hover,
+  &.is-hover {
+    @content;
+  }
+}
+@mixin on-focus {
+  $self: if(sass(&): '&'; else: '');
+
+  #{$self}:focus-visible {
+    @content;
+  }
+  #{$self}.is-focus {
+    @content;
+  }
+}
+@mixin on-press {
+  &:active:not(:disabled),
+  &.is-active {
+    @content;
+  }
+}
+@mixin on-disabled {
+  &:disabled,
+  &.is-disabled {
+    @content;
+  }
+}
+@mixin on-checked {
+  &:checked,
+  &.is-checked {
+    @content;
+  }
+}
+@mixin on-selected {
+  &[aria-selected='true'],
+  &[aria-pressed='true'],
+  &.is-selected {
+    @content;
+  }
+}
+
+@mixin focus-ring {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+@mixin truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@mixin clamp-lines($n: 2) {
+  display: -webkit-box;
+  -webkit-line-clamp: $n;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+@mixin from($name) {
+  @media (min-width: map.get($breakpoints, $name)) {
+    @content;
+  }
+}
+@mixin until($name) {
+  @media (max-width: map.get($breakpoints, $name)) {
+    @content;
+  }
+}
+
+@mixin fromDir($name) {
+  @media (min-inline-size: map.get($breakpoints, $name)) {
+    @content;
+  }
+}
+@mixin untilDir($name) {
+  @media (max-inline-size: map.get($breakpoints, $name)) {
+    @content;
+  }
+}
+
+// a hit area that stays thumb-sized however small the visual box is
+@mixin touch-target($size: $touch-min) {
+  position: relative;
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 50% auto auto 50%;
+    inline-size: $size;
+    block-size: $size;
+    transform: translate(-50%, -50%);
+  }
+}
+
+@mixin glass($fill: var(--alpha-white-12), $blur: var(--blur-md)) {
+  background: $fill;
+  backdrop-filter: blur($blur);
+}
+
+@mixin sr-only {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

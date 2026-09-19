@@ -1,0 +1,264 @@
+@use '../mixins' as *;
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  block-size: var(--control-h-md);
+  padding-inline: var(--sp-5);
+  font-family: var(--font-ui);
+  font-size: var(--fs-body);
+  font-weight: var(--fw-bold);
+  line-height: 1;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+  border: var(--bw-hair) solid transparent;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--text-primary);
+  transition:
+    var(--transition-color),
+    transform var(--dur-fast) var(--ease-standard);
+
+  @include on-press {
+    transform: scale(0.97);
+  }
+  @include on-focus {
+    @include focus-ring;
+  }
+  @include on-disabled {
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  &__icon {
+    inline-size: 1.15em;
+    block-size: 1.15em;
+    flex: none;
+    display: grid;
+    place-items: center;
+  }
+
+  &--sm {
+    block-size: var(--control-h-sm);
+    padding-inline: var(--sp-3);
+    font-size: var(--fs-body-sm);
+    border-radius: var(--radius-sm);
+  }
+  &--lg {
+    block-size: var(--control-h-lg);
+    padding-inline: var(--sp-6);
+    font-size: var(--fs-body-lg);
+    border-radius: var(--radius-lg);
+  }
+  &--block {
+    display: flex;
+    inline-size: 100%;
+  }
+  &--pill {
+    border-radius: var(--radius-pill);
+  }
+
+  &--primary {
+    background: var(--accent);
+    color: var(--text-on-accent);
+    box-shadow: var(--shadow-accent);
+    @include on-hover {
+      background: var(--accent-hover);
+    }
+    @include on-press {
+      background: var(--accent-active);
+      box-shadow: none;
+    }
+    @include on-disabled {
+      background: var(--accent-disabled);
+      color: var(--text-disabled);
+      box-shadow: none;
+    }
+  }
+
+  &--secondary {
+    background: var(--surface-overlay);
+    color: var(--text-primary);
+    border-color: var(--border-default);
+    @include on-hover {
+      background: var(--ink-400);
+      border-color: var(--border-strong);
+    }
+    @include on-press {
+      background: var(--ink-300);
+    }
+    @include on-disabled {
+      background: var(--surface-raised);
+      color: var(--text-disabled);
+      border-color: var(--border-subtle);
+    }
+  }
+
+  &--outline {
+    border-color: var(--border-strong);
+    color: var(--text-primary);
+    @include on-hover {
+      background: var(--surface-hover);
+      border-color: var(--text-secondary);
+    }
+    @include on-press {
+      background: var(--surface-active);
+    }
+    @include on-disabled {
+      color: var(--text-disabled);
+      border-color: var(--border-subtle);
+    }
+  }
+
+  &--ghost {
+    color: var(--text-secondary);
+    @include on-hover {
+      background: var(--surface-hover);
+      color: var(--text-primary);
+    }
+    @include on-press {
+      background: var(--surface-active);
+    }
+    @include on-disabled {
+      color: var(--text-disabled);
+      background: transparent;
+    }
+  }
+
+  &--glass {
+    @include glass;
+    color: var(--alpha-white-100);
+    border-color: var(--alpha-white-16);
+    @include on-hover {
+      background: var(--alpha-white-24);
+    }
+    @include on-press {
+      background: var(--alpha-white-16);
+    }
+    @include on-disabled {
+      background: var(--alpha-white-06);
+      color: var(--alpha-white-40);
+    }
+  }
+
+  &--danger {
+    background: var(--status-danger);
+    color: var(--text-on-solid);
+    @include on-hover {
+      background: var(--rose-400);
+    }
+    @include on-press {
+      background: var(--rose-700);
+      color: var(--alpha-white-100);
+    }
+    @include on-disabled {
+      background: var(--surface-overlay);
+      color: var(--text-disabled);
+    }
+  }
+
+  &--loading {
+    pointer-events: none;
+    color: transparent;
+    position: relative;
+    &::after {
+      content: '';
+      position: absolute;
+      inline-size: 1.05em;
+      block-size: 1.05em;
+      border-radius: var(--radius-circle);
+      border: var(--bw-thick) solid var(--alpha-white-24);
+      border-block-start-color: var(--alpha-white-100);
+      animation: flix-spin var(--dur-ambient) var(--ease-linear) infinite;
+    }
+  }
+  &--primary#{&}--loading::after {
+    border-color: var(--alpha-white-40);
+    border-block-start-color: var(--text-on-accent);
+  }
+}
+
+.icon-btn {
+  display: inline-grid;
+  place-items: center;
+  inline-size: var(--control-h-md);
+  block-size: var(--control-h-md);
+  padding: 0;
+  border: var(--bw-hair) solid transparent;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition:
+    var(--transition-color),
+    transform var(--dur-fast) var(--ease-standard);
+
+  svg {
+    inline-size: 55%;
+    block-size: 55%;
+  }
+  @include on-hover {
+    background: var(--surface-hover);
+    color: var(--text-primary);
+  }
+  @include on-press {
+    background: var(--surface-active);
+    transform: scale(0.94);
+  }
+  @include on-focus {
+    @include focus-ring;
+  }
+  @include on-disabled {
+    color: var(--text-disabled);
+    cursor: not-allowed;
+    background: transparent;
+  }
+
+  &--sm {
+    inline-size: var(--control-h-sm);
+    block-size: var(--control-h-sm);
+    border-radius: var(--radius-sm);
+  }
+  &--lg {
+    inline-size: var(--control-h-lg);
+    block-size: var(--control-h-lg);
+    border-radius: var(--radius-lg);
+  }
+  &--round {
+    border-radius: var(--radius-circle);
+  }
+  &--solid {
+    background: var(--surface-overlay);
+    border-color: var(--border-default);
+    color: var(--text-primary);
+    @include on-hover {
+      background: var(--ink-400);
+    }
+  }
+  &--accent {
+    background: var(--accent);
+    color: var(--text-on-accent);
+    @include on-hover {
+      background: var(--accent-hover);
+    }
+  }
+  &--glass {
+    @include glass;
+    color: var(--alpha-white-100);
+    @include on-hover {
+      background: var(--alpha-white-24);
+    }
+  }
+  &--touch {
+    @include touch-target;
+  }
+}

@@ -1,0 +1,74 @@
+@use 'mixins' as *;
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--surface-page);
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  font-size: var(--fs-body);
+  font-weight: var(--fw-medium);
+  line-height: var(--lh-normal);
+  letter-spacing: var(--ls-normal);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  box-sizing: border-box;
+}
+
+img,
+svg,
+video {
+  display: block;
+  max-width: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+::selection {
+  background: var(--alpha-violet-40);
+  color: var(--text-primary);
+}
+@include on-focus {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+a {
+  color: var(--text-link);
+  text-decoration-color: var(--alpha-violet-40);
+  text-underline-offset: 3px;
+  transition: var(--transition-color);
+
+  &:hover {
+    color: var(--text-link-hover);
+    text-decoration-color: var(--text-link-hover);
+  }
+  &:active {
+    color: var(--violet-400);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

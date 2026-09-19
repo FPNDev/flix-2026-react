@@ -1,0 +1,63 @@
+@use '@/assets/scss/mixins' as *;
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  inline-size: 25rem;
+  max-inline-size: 100%;
+  padding: var(--sp-3) var(--sp-4);
+  border: var(--bw-hair) solid var(--border-default);
+  border-radius: var(--radius-lg);
+  background: var(--surface-overlay);
+  box-shadow: var(--shadow-lg);
+  animation: toast-in forwards var(--dur-slow) var(--ease-entrance);
+  pointer-events: auto;
+
+  &.removing {
+    animation: toast-out forwards var(--dur-fast) var(--ease-exit);
+    pointer-events: none;
+  }
+
+  .text {
+    flex: 1;
+    font-size: var(--fs-body-sm);
+    font-weight: var(--fw-semibold);
+    text-wrap: pretty;
+    word-wrap: break-word;
+    overflow: hidden;
+
+    @include clamp-lines(2);
+  }
+  &.success .icon {
+    color: var(--status-success);
+  }
+  &.danger .icon {
+    color: var(--status-danger);
+  }
+  &.accent .icon {
+    color: var(--text-accent);
+  }
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--sp-3));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes toast-out {
+  to {
+    opacity: 0;
+    transform: translateY(var(--sp-3));
+  }
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

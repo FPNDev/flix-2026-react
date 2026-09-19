@@ -1,0 +1,629 @@
+@use '../variables' as *;
+@use '../mixins' as *;
+
+.quality {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  flex-wrap: wrap;
+  &--text {
+    font-family: var(--font-mono);
+    font-size: var(--fs-body-sm);
+    font-weight: var(--fw-medium);
+    color: var(--text-secondary);
+    text-transform: uppercase;
+  }
+}
+
+.qtag {
+  display: inline-flex;
+  align-items: center;
+  block-size: var(--sp-6);
+  padding-inline: var(--sp-2);
+  border-radius: var(--radius-xs);
+  font-size: var(--fs-micro);
+  font-weight: var(--fw-black);
+  line-height: 1;
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  white-space: nowrap;
+
+  &--name {
+    background: var(--qual-name-bg);
+    color: var(--qual-name-fg);
+  }
+  &--res {
+    background: var(--qual-res-bg);
+    color: var(--qual-res-fg);
+  }
+  &--res-4k {
+    background: var(--qual-res-4k-bg);
+    color: var(--qual-res-4k-fg);
+  }
+  &--audio {
+    background: var(--qual-audio-bg);
+    color: var(--qual-audio-fg);
+  }
+  &--hdr {
+    background: var(--qual-hdr-bg);
+    color: var(--qual-hdr-fg);
+  }
+  &--sm {
+    block-size: var(--sp-5);
+    padding-inline: var(--sp-1);
+  }
+  // --xs keeps the widest descriptor (BDRip 4K HDR 5.1) on one line inside a poster card
+  &--xs {
+    block-size: var(--sp-4);
+    padding-inline: var(--sp-1);
+    letter-spacing: var(--ls-normal);
+  }
+}
+
+// The descriptor over artwork. Each facet carries its OWN dark backing
+// rather than sitting in one shared capsule: a single capsule is a flex
+// container, so when the facets wrap it stretches to the full card width
+// and the short second line leaves a slab of empty background.
+//
+// Every chip also gets a near-opaque dark PLATE behind its facet tint.
+// The tints are 12-16% alpha, which vanishes over a bright poster (the
+// 5.1 chip on a pale sky was the worst case). The plate is a ::before at
+// z-index -1, so the tint still reads as colour but always against black.
+.quality--card {
+  gap: var(--sp-1);
+  align-items: flex-start;
+  .qtag {
+    position: relative;
+    isolation: isolate;
+    box-shadow:
+      0 0 0 var(--bw-hair) var(--alpha-black-40),
+      var(--shadow-sm);
+    backdrop-filter: blur(var(--blur-sm));
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      border-radius: inherit;
+      background: var(--alpha-black-88);
+    }
+  }
+  .qtag--name {
+    background: var(--alpha-black-72);
+    color: var(--alpha-white-100);
+  }
+  .qtag--audio {
+    color: var(--sky-400);
+  }
+  .qtag--res {
+    color: var(--violet-200);
+  }
+  // solid-fill facets are already opaque
+  .qtag--res-4k::before,
+  .qtag--hdr::before {
+    display: none;
+  }
+}
+
+.strength {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  flex: none;
+  i {
+    inline-size: var(--sp-2);
+    block-size: var(--sp-2);
+    border-radius: var(--radius-circle);
+    background: var(--conn-empty);
+    transition: background-color var(--dur-quick) var(--ease-standard);
+  }
+  &--high i {
+    background: var(--conn-strong);
+  }
+  &--mid i:nth-child(-n + 2) {
+    background: var(--conn-medium);
+  }
+  &--low i:nth-child(1) {
+    background: var(--conn-weak);
+  }
+  &--none i {
+    background: var(--conn-empty);
+    opacity: 0.5;
+  }
+  &--lg i {
+    inline-size: var(--sp-3);
+    block-size: var(--sp-3);
+  }
+}
+
+.strength-label {
+  font-size: var(--fs-caption);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-wide);
+  white-space: nowrap;
+  &--high {
+    color: var(--conn-strong);
+  }
+  &--mid {
+    color: var(--conn-medium);
+  }
+  &--low {
+    color: var(--conn-weak);
+  }
+  &--none {
+    color: var(--text-tertiary);
+  }
+}
+
+.qsel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  inline-size: 100%;
+  &__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-4);
+    flex-wrap: wrap;
+  }
+  &__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  &__note {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--sp-2);
+    font-size: var(--fs-caption);
+    color: var(--text-tertiary);
+  }
+
+  &--compact {
+    .qopt {
+      background: var(--alpha-black-56);
+      border-color: var(--alpha-white-12);
+      backdrop-filter: blur(var(--blur-md));
+    }
+    .qopt__summary {
+      padding: var(--sp-2) var(--sp-3);
+      min-block-size: var(--control-h-md);
+    }
+    .srclist {
+      padding: var(--sp-1);
+    }
+  }
+}
+
+// One quality, with its sources underneath.
+//
+// Clicking the row SELECTS the quality and takes its most reliable
+// source automatically — that is the point of the strength estimate,
+// and it spares the viewer a second decision they usually do not care
+// about. The chevron is a separate target that reveals the source list
+// for anyone who wants to override.
+//
+// Two hidden inputs drive it, so it stays script-free:
+//   .qopt__pick    radio    — which quality is chosen
+//   .qopt__toggle  checkbox — whether its sources are showing
+.qopt {
+  background: var(--surface-raised);
+  border: var(--bw-hair) solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: var(--transition-color);
+
+  @include on-hover {
+    border-color: var(--border-default);
+  }
+  &:has(.qopt__pick:checked),
+  &.is-selected {
+    border-color: var(--border-accent);
+    background: var(--surface-selected);
+    .qopt__meta,
+    .qopt__auto {
+      color: var(--text-secondary);
+    }
+  }
+  &.is-unavailable {
+    opacity: 0.55;
+  }
+
+  &__pick,
+  &__toggle {
+    position: absolute;
+    opacity: 0;
+    inline-size: 0;
+    block-size: 0;
+  }
+  &__row {
+    display: flex;
+    align-items: stretch;
+  }
+
+  &__summary {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    flex: 1;
+    min-inline-size: 0;
+    padding: var(--sp-3) var(--sp-4);
+    cursor: pointer;
+    list-style: none;
+    min-block-size: var(--touch-min);
+    transition: var(--transition-color);
+    &::-webkit-details-marker {
+      display: none;
+    }
+    @include on-hover {
+      background: var(--surface-hover);
+    }
+    @include on-focus {
+      @include focus-ring;
+    }
+    @include until('mobile') {
+      padding: var(--sp-3);
+    }
+  }
+  &__pick:focus-visible ~ .qopt__row .qopt__summary {
+    box-shadow: var(--focus-ring);
+  }
+  &__main {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+    min-inline-size: 0;
+    flex: 1;
+  }
+  &__meta {
+    font-size: var(--fs-caption);
+    font-weight: var(--fw-medium);
+    color: var(--text-tertiary);
+  }
+  // the source FLIX picked for you, named so the choice is never hidden
+  &__auto {
+    font-size: var(--fs-caption);
+    font-weight: var(--fw-bold);
+    color: var(--text-tertiary);
+    @include truncate;
+    em {
+      font-style: normal;
+      font-weight: var(--fw-medium);
+    }
+  }
+  &__best {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    flex: none;
+    @include until('mobile') {
+      .strength-label {
+        display: none;
+      }
+    }
+  }
+
+  // the expander is its own target, not the whole row
+  &__chev {
+    display: grid;
+    place-items: center;
+    flex: none;
+    inline-size: var(--touch-min);
+    border-inline-start: var(--bw-hair) solid var(--border-subtle);
+    color: var(--text-tertiary);
+    cursor: pointer;
+    transition:
+      var(--transition-color),
+      transform var(--dur-quick) var(--ease-standard);
+    @include on-hover {
+      background: var(--surface-hover);
+      color: var(--text-primary);
+    }
+    svg {
+      inline-size: 100%;
+      block-size: 100%;
+    }
+  }
+  &__toggle:focus-visible ~ .qopt__row .qopt__chev {
+    box-shadow: var(--focus-ring);
+  }
+  &:has(.qopt__toggle:checked) .qopt__chev,
+  &.is-expanded .qopt__chev {
+    transform: rotate(180deg);
+    color: var(--text-primary);
+  }
+  &--single .qopt__chev {
+    display: none;
+  }
+
+  // the source list is collapsed until the chevron is used
+  .srclist {
+    display: none;
+  }
+  &:has(.qopt__toggle:checked) .srclist,
+  &.is-expanded .srclist {
+    display: flex;
+  }
+}
+
+// legacy <details class="qopt"> markup keeps working while callers migrate
+details.qopt {
+  &[open] .srclist {
+    display: flex;
+  }
+  &[open] .qopt__chev {
+    transform: rotate(180deg);
+  }
+  .qopt__summary {
+    flex: 1;
+  }
+}
+
+// A single-source quality is not a dropdown — the row IS the source.
+.qrow {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+  min-block-size: var(--touch-min);
+  cursor: pointer;
+  transition: var(--transition-color);
+
+  &__main {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+    min-inline-size: 0;
+    flex: 1;
+  }
+  &__src {
+    display: block;
+    font-size: var(--fs-caption);
+    font-weight: var(--fw-bold);
+    color: var(--text-tertiary);
+    @include truncate;
+    em {
+      font-style: normal;
+      font-weight: var(--fw-medium);
+      color: var(--text-tertiary);
+    }
+  }
+
+  @include on-hover {
+    background: var(--surface-hover);
+    .src__mark {
+      border-color: var(--border-input-hover);
+    }
+    .qrow__src {
+      color: var(--text-secondary);
+    }
+  }
+  .src__input:focus-visible ~ .src__mark {
+    box-shadow: var(--focus-ring);
+  }
+  &.is-focus .src__mark {
+    box-shadow: var(--focus-ring);
+  }
+
+  &:has(.src__input:checked),
+  &.is-selected {
+    .src__mark {
+      border-color: var(--accent);
+      &::after {
+        transform: translate(-50%, -50%) scale(1);
+      }
+    }
+    .qrow__src {
+      color: var(--text-secondary);
+    }
+  }
+
+  &.is-disabled,
+  &.is-offline {
+    cursor: not-allowed;
+    &:hover {
+      background: transparent;
+    }
+  }
+  &.is-offline .qrow__src {
+    text-decoration: line-through;
+    text-decoration-color: var(--border-strong);
+  }
+  &.is-playing .qrow__src::after {
+    content: ' Playing';
+    font-size: var(--fs-micro);
+    font-weight: var(--fw-bold);
+    letter-spacing: var(--ls-wide);
+    text-transform: uppercase;
+    color: var(--text-accent);
+  }
+}
+
+.srclist {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: var(--sp-1) var(--sp-2) var(--sp-2);
+  list-style: none;
+  border-block-start: var(--bw-hair) solid var(--border-subtle);
+  gap: var(--sp-px);
+}
+
+.src {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-2) var(--sp-3);
+  min-block-size: var(--touch-min);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: var(--transition-color);
+
+  &__input {
+    position: absolute;
+    opacity: 0;
+    inline-size: 0;
+    block-size: 0;
+  }
+  &__mark {
+    flex: none;
+    inline-size: var(--sp-4);
+    block-size: var(--sp-4);
+    border-radius: var(--radius-circle);
+    border: var(--bw-thick) solid var(--border-input);
+    position: relative;
+    transition: var(--transition-color);
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 50% auto auto 50%;
+      inline-size: var(--sp-2);
+      block-size: var(--sp-2);
+      border-radius: var(--radius-circle);
+      background: var(--accent);
+      transform: translate(-50%, -50%) scale(0);
+      transition: transform var(--dur-quick) var(--ease-spring);
+    }
+  }
+  &__name {
+    flex: 1;
+    min-inline-size: 0;
+    font-size: var(--fs-body-sm);
+    font-weight: var(--fw-bold);
+    color: var(--text-secondary);
+    @include truncate;
+  }
+  &__right {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    flex: none;
+  }
+
+  @include on-hover {
+    background: var(--surface-hover);
+    .src__name {
+      color: var(--text-primary);
+    }
+    .src__mark {
+      border-color: var(--border-input-hover);
+    }
+  }
+  .src__input:focus-visible ~ .src__mark {
+    box-shadow: var(--focus-ring);
+  }
+  &.is-focus .src__mark {
+    box-shadow: var(--focus-ring);
+  }
+
+  &:has(.src__input:checked),
+  &.is-selected {
+    background: var(--accent-subtle);
+    .src__mark {
+      border-color: var(--accent);
+      &::after {
+        transform: translate(-50%, -50%) scale(1);
+      }
+    }
+    .src__name {
+      color: var(--text-primary);
+    }
+  }
+
+  &.is-disabled,
+  &.is-offline {
+    cursor: not-allowed;
+    .src__name {
+      color: var(--text-disabled);
+      text-decoration: line-through;
+      text-decoration-color: var(--border-strong);
+    }
+    &:hover {
+      background: transparent;
+    }
+  }
+  &.is-playing .src__name::after {
+    content: 'Playing';
+    margin-inline-start: var(--sp-2);
+    font-size: var(--fs-micro);
+    font-weight: var(--fw-bold);
+    letter-spacing: var(--ls-wide);
+    text-transform: uppercase;
+    color: var(--text-accent);
+  }
+}
+
+.qfilter {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+  &__label {
+    font-size: var(--fs-micro);
+    font-weight: var(--fw-bold);
+    letter-spacing: var(--ls-caps);
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    margin-inline-end: var(--sp-1);
+  }
+}
+
+.qcurrent {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-3);
+  block-size: var(--control-h-md);
+  padding-inline: var(--sp-3);
+  background: var(--surface-overlay);
+  border: var(--bw-hair) solid var(--border-default);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: var(--transition-color);
+  @include on-hover {
+    background: var(--ink-400);
+    border-color: var(--border-strong);
+  }
+  @include on-focus {
+    @include focus-ring;
+  }
+  .quality {
+    flex-wrap: nowrap;
+  }
+  &__src {
+    font-size: var(--fs-caption);
+    font-weight: var(--fw-bold);
+    color: var(--text-tertiary);
+  }
+}
+
+// Mobile: commit explicitly. On a phone the picker is a curtain, and a
+// tap that both selects a quality and starts a stream is too easy to
+// make by accident. Sources stay inert until their quality is selected,
+// and an Apply button in the footer commits the pair.
+@include until('tablet') {
+  .qsel--commit .qopt:not(:has(.qopt__pick:checked)) {
+    .srclist {
+      opacity: 0.45;
+      pointer-events: none;
+    }
+    .src {
+      cursor: default;
+    }
+    .srclist::before {
+      content: 'Select this quality to choose a source';
+      display: block;
+      padding: var(--sp-2) var(--sp-3) var(--sp-1);
+      font-size: var(--fs-micro);
+      font-weight: var(--fw-bold);
+      letter-spacing: var(--ls-wide);
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+    }
+  }
+}

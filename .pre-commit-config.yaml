@@ -1,0 +1,55 @@
+default_stages: [pre-commit, pre-push]
+fail_fast: true
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+      - id: check-yaml
+      - id: sort-simple-yaml
+      - id: check-added-large-files
+
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.49.1
+    hooks:
+      - id: markdownlint
+        args: ['--fix', '--disable', 'MD001']
+
+  - repo: local
+    hooks:
+      - id: oxlint
+        name: OXLint
+        entry: npx oxlint .
+        language: system
+
+      - id: prettier
+        name: Prettier
+        entry: npx prettier .
+        args: ['--write']
+        language: system
+
+  - repo: local
+    hooks:
+      - id: add_conventional_prefix
+        name: Prefix commit message
+        entry: python ./scripts/add_conventional_prefix.py
+        args: ['--allow-main']
+        pass_filenames: true
+        language: python
+        language_version: python3.11
+        stages: [commit-msg]
+
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v4.4.0
+    hooks:
+      - id: conventional-pre-commit
+        stages: [commit-msg]
+        args:
+          - init
+          - refactor
+          - feat
+          - fix
+          - docs
+          - test

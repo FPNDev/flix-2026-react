@@ -1,0 +1,96 @@
+// FLIX — scss/base/_typography.scss
+@use '../variables' as *;
+
+%flix-display {
+  font-family: var(--font-display);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--ls-display);
+  margin: 0;
+}
+%flix-heading {
+  font-family: var(--font-display);
+  line-height: var(--lh-snug);
+  letter-spacing: var(--ls-heading);
+  margin: 0;
+}
+
+.t-display-1 {
+  @extend %flix-display;
+  font-size: var(--fs-display-1);
+  font-weight: var(--fw-black);
+}
+.t-display-2 {
+  @extend %flix-display;
+  font-size: var(--fs-display-2);
+  font-weight: var(--fw-bold);
+}
+.t-h1 {
+  @extend %flix-heading;
+  font-size: var(--fs-h1);
+  font-weight: var(--fw-bold);
+}
+.t-h2 {
+  @extend %flix-heading;
+  font-size: var(--fs-h2);
+  font-weight: var(--fw-semibold);
+}
+.t-h3 {
+  @extend %flix-heading;
+  font-size: var(--fs-h3);
+  font-weight: var(--fw-semibold);
+}
+.t-h4 {
+  font-family: var(--font-ui);
+  font-size: var(--fs-h4);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-snug);
+  margin: 0;
+}
+
+.t-body-lg {
+  font-size: var(--fs-body-lg);
+  font-weight: var(--fw-regular);
+  line-height: var(--lh-relaxed);
+  margin: 0;
+}
+.t-body {
+  font-size: var(--fs-body);
+  font-weight: var(--fw-regular);
+  line-height: var(--lh-normal);
+  margin: 0;
+}
+.t-body-sm {
+  font-size: var(--fs-body-sm);
+  font-weight: var(--fw-regular);
+  line-height: var(--lh-normal);
+  margin: 0;
+}
+.t-caption {
+  font-size: var(--fs-caption);
+  font-weight: var(--fw-medium);
+  color: var(--text-tertiary);
+  margin: 0;
+}
+.t-overline {
+  font-size: var(--fs-micro);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  margin: 0;
+}
+.t-mono {
+  font-family: var(--font-mono);
+  font-size: var(--fs-body-sm);
+  font-weight: var(--fw-regular);
+}
+
+.t-secondary {
+  color: var(--text-secondary);
+}
+.t-tertiary {
+  color: var(--text-tertiary);
+}
+.t-accent {
+  color: var(--text-accent);
+}
