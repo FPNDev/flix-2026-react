@@ -1,0 +1,18 @@
+@use '@/assets/scss/mixins' as *;
+
+.toast-stack {
+  position: fixed;
+  inset-block-end: var(--sp-6);
+  inset-inline: var(--sp-6);
+  z-index: var(--z-toast);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--sp-2);
+  pointer-events: none;
+
+  @include untilDir('mobile') {
+    inset-inline: var(--sp-3);
+    inset-block-end: calc(var(--tabbar-height) + var(--sp-3));
+  }
+}

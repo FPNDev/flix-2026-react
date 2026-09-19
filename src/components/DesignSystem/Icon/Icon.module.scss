@@ -1,0 +1,62 @@
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
+
+@mixin icon-axes($fill: 0, $wght: 400) {
+  font-variation-settings:
+    'FILL' $fill,
+    'wght' $wght,
+    'GRAD' 0,
+    'opsz' 24;
+}
+
+.icon {
+  display: inline-block;
+  font-family: 'Material Symbols Rounded';
+  font-weight: normal;
+  font-style: normal;
+  font-size: var(--icon-md);
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  flex: none;
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+  @include icon-axes;
+
+  &.fill {
+    @include icon-axes(1, 400);
+  }
+  &.thin {
+    @include icon-axes(0, 200);
+  }
+  &.fill-thin {
+    @include icon-axes(1, 200);
+  }
+  &.bold {
+    @include icon-axes(0, 600);
+  }
+  &.fill-bold {
+    @include icon-axes(1, 600);
+  }
+
+  &.s-xs {
+    font-size: var(--icon-xs);
+  }
+  &.s-sm {
+    font-size: var(--icon-sm);
+  }
+  &.s-md {
+    font-size: var(--icon-md);
+  }
+  &.s-lg {
+    font-size: var(--icon-lg);
+  }
+  &.s-xl {
+    font-size: var(--icon-xl);
+  }
+  &.s-2xl {
+    font-size: var(--icon-2xl);
+  }
+}

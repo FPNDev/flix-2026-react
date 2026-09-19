@@ -1,0 +1,115 @@
+%dark-tokens {
+  color-scheme: dark;
+
+  --surface-page: var(--ink-050);
+  --surface-base: var(--ink-100);
+  --surface-raised: var(--ink-200);
+  --surface-overlay: var(--ink-300);
+  --surface-sunken: var(--ink-000);
+  --surface-input: var(--ink-200);
+  --surface-input-hover: var(--ink-300);
+  --surface-hover: var(--alpha-white-06);
+  --surface-active: var(--alpha-white-12);
+  --surface-selected: var(--alpha-violet-16);
+  --surface-glass: var(--alpha-plum-72);
+  --surface-scrim: var(--alpha-black-72);
+  --surface-skeleton: var(--ink-300);
+  --surface-skeleton-sheen: var(--ink-400);
+
+  --border-subtle: var(--alpha-white-06);
+  --border-default: var(--alpha-white-12);
+  --border-strong: var(--alpha-white-24);
+  --border-accent: var(--violet-500);
+  --border-input: var(--ink-400);
+  --border-input-hover: var(--ink-500);
+
+  --text-primary: var(--cream-100);
+  --text-secondary: var(--cream-300);
+  --text-tertiary: var(--cream-400);
+  --text-disabled: var(--cream-500);
+  --text-on-accent: var(--cream-200);
+  --text-on-solid: var(--ink-050);
+  --text-accent: var(--violet-300);
+  --text-link: var(--violet-300);
+  --text-link-hover: var(--violet-200);
+  --text-danger: var(--rose-400);
+  --text-success: var(--mint-400);
+  --text-warning: var(--amber-400);
+
+  --accent: var(--violet-800);
+  --accent-hover: var(--violet-700);
+  --accent-active: var(--violet-900);
+  --accent-subtle: var(--alpha-violet-16);
+  --accent-subtle-hover: var(--alpha-violet-24);
+  --accent-disabled: var(--ink-400);
+
+  --focus-ring-color: var(--violet-300);
+  --focus-ring-offset: var(--surface-page);
+  --focus-ring:
+    0 0 0 var(--bw-focus) var(--focus-ring-offset),
+    0 0 0 calc(var(--bw-focus) * 2) var(--focus-ring-color);
+
+  --status-success: var(--mint-500);
+  --status-success-bg: var(--alpha-mint-12);
+  --status-success-border: var(--alpha-mint-24);
+  --status-warning: var(--amber-500);
+  --status-warning-bg: var(--alpha-amber-12);
+  --status-warning-border: var(--alpha-amber-24);
+  --status-danger: var(--rose-500);
+  --status-danger-bg: var(--alpha-rose-12);
+  --status-danger-border: var(--alpha-rose-24);
+  --status-info: var(--sky-500);
+  --status-info-bg: var(--alpha-sky-12);
+  --status-info-border: var(--alpha-sky-24);
+
+  --conn-strong: var(--mint-500);
+  --conn-strong-bg: var(--alpha-mint-12);
+  --conn-medium: var(--amber-500);
+  --conn-medium-bg: var(--alpha-amber-12);
+  --conn-weak: var(--rose-500);
+  --conn-weak-bg: var(--alpha-rose-12);
+  --conn-empty: var(--ink-500);
+
+  --qual-name-fg: var(--cream-300);
+  --qual-name-bg: var(--alpha-white-08);
+  --qual-res-fg: var(--violet-200);
+  --qual-res-bg: var(--alpha-violet-16);
+  --qual-res-4k-fg: var(--violet-100);
+  --qual-res-4k-bg: var(--violet-600);
+  --qual-audio-fg: var(--sky-400);
+  --qual-audio-bg: var(--alpha-sky-12);
+  --qual-hdr-fg: var(--ink-050);
+  --qual-hdr-bg: var(--gold-500);
+
+  --poster-fallback-a: var(--ink-300);
+  --poster-fallback-b: var(--ink-500);
+  --media-protection: linear-gradient(
+    to top,
+    var(--alpha-plum-96) 0%,
+    var(--alpha-plum-72) 38%,
+    var(--alpha-plum-00) 100%
+  );
+  --media-protection-side: linear-gradient(
+    to right,
+    var(--alpha-plum-96) 0%,
+    var(--alpha-plum-72) 45%,
+    var(--alpha-plum-00) 100%
+  );
+  --hero-vignette: radial-gradient(
+    120% 90% at 78% 20%,
+    var(--alpha-violet-24) 0%,
+    var(--alpha-plum-00) 60%
+  );
+
+  --player-track: var(--alpha-white-24);
+  --player-buffer: var(--alpha-white-40);
+  --player-progress: var(--accent);
+  --player-scrub: var(--alpha-white-100);
+}
+
+:root {
+  @extend %dark-tokens;
+}
+[data-theme='dark'] {
+  @extend %dark-tokens;
+}

@@ -1,0 +1,14 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["react", "typescript", "oxc"],
+  "rules": {
+    "react/use-memo": "off",
+    "react/exhaustive-deps": "off",
+    "react/rules-of-hooks": "error",
+    "react/only-export-components": ["warn", { "allowConstantExport": true }],
+    "react/syntax": "error",
+    "react/refs": "error",
+    "react/exhaustive-effect-dependencies": "error"
+  },
+  "ignorePatterns": ["dist/*", "scripts/*"]
+}

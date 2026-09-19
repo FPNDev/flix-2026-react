@@ -1,0 +1,205 @@
+@use '../mixins' as *;
+
+@keyframes flix-slide {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(250%);
+  }
+}
+@keyframes flix-sheen {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.progress {
+  inline-size: 100%;
+  block-size: var(--sp-1);
+  border-radius: var(--radius-pill);
+  background: var(--alpha-white-12);
+  overflow: hidden;
+  &__fill {
+    display: block;
+    block-size: 100%;
+    border-radius: inherit;
+    background: var(--accent);
+    transition: inline-size var(--dur-slow) var(--ease-standard);
+  }
+  &--thick {
+    block-size: var(--sp-2);
+  }
+  &--success .progress__fill {
+    background: var(--status-success);
+  }
+  &--indeterminate .progress__fill {
+    inline-size: 40%;
+    animation: flix-slide var(--dur-ambient) var(--ease-standard) infinite;
+  }
+}
+
+.spinner {
+  inline-size: var(--sp-6);
+  block-size: var(--sp-6);
+  border-radius: var(--radius-circle);
+  border: var(--bw-thick) solid var(--alpha-white-12);
+  border-block-start-color: var(--accent);
+  animation: flix-spin var(--dur-ambient) var(--ease-linear) infinite;
+  &--sm {
+    inline-size: var(--sp-4);
+    block-size: var(--sp-4);
+  }
+  &--lg {
+    inline-size: var(--sp-8);
+    block-size: var(--sp-8);
+    border-width: 3px;
+  }
+}
+
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  background: var(--surface-skeleton);
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      var(--alpha-plum-00),
+      var(--alpha-white-08) 50%,
+      var(--alpha-plum-00)
+    );
+    animation: flix-sheen var(--dur-ambient) var(--ease-standard) infinite;
+  }
+  &--text {
+    block-size: var(--sp-3);
+    border-radius: var(--radius-xs);
+  }
+  &--title {
+    block-size: var(--sp-5);
+    border-radius: var(--radius-xs);
+  }
+  &--poster {
+    aspect-ratio: var(--ratio-poster);
+    border-radius: var(--radius-lg);
+  }
+  &--landscape {
+    aspect-ratio: var(--ratio-landscape);
+    border-radius: var(--radius-lg);
+  }
+  &--circle {
+    border-radius: var(--radius-circle);
+    aspect-ratio: var(--ratio-square);
+  }
+}
+
+.alert {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+  border: var(--bw-hair) solid var(--border-default);
+  border-radius: var(--radius-lg);
+  background: var(--surface-raised);
+
+  &__icon {
+    flex: none;
+    inline-size: var(--sp-5);
+    block-size: var(--sp-5);
+    display: grid;
+    place-items: center;
+    color: var(--text-tertiary);
+  }
+  &__body {
+    flex: 1;
+    min-inline-size: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+  }
+  &__title {
+    font-size: var(--fs-body-sm);
+    font-weight: var(--fw-bold);
+    color: var(--text-primary);
+    margin: 0;
+  }
+  &__text {
+    font-size: var(--fs-body-sm);
+    color: var(--text-secondary);
+    margin: 0;
+  }
+
+  &--info {
+    background: var(--status-info-bg);
+    border-color: var(--status-info-border);
+    .alert__icon {
+      color: var(--status-info);
+    }
+  }
+  &--success {
+    background: var(--status-success-bg);
+    border-color: var(--status-success-border);
+    .alert__icon {
+      color: var(--status-success);
+    }
+  }
+  &--warning {
+    background: var(--status-warning-bg);
+    border-color: var(--status-warning-border);
+    .alert__icon {
+      color: var(--status-warning);
+    }
+  }
+  &--danger {
+    background: var(--status-danger-bg);
+    border-color: var(--status-danger-border);
+    .alert__icon {
+      color: var(--status-danger);
+    }
+  }
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-10) var(--sp-6);
+  text-align: center;
+  border: var(--bw-hair) dashed var(--border-default);
+  border-radius: var(--radius-xl);
+  background: var(--alpha-white-04);
+
+  &__glyph {
+    inline-size: var(--sp-10);
+    block-size: var(--sp-10);
+    display: grid;
+    place-items: center;
+    border-radius: var(--radius-circle);
+    background: var(--accent-subtle);
+    color: var(--text-accent);
+    svg {
+      inline-size: 50%;
+      block-size: 50%;
+    }
+  }
+  &__title {
+    font-family: var(--font-display);
+    font-size: var(--fs-h4);
+    font-weight: var(--fw-semibold);
+    margin: 0;
+  }
+  &__text {
+    font-size: var(--fs-body-sm);
+    color: var(--text-tertiary);
+    margin: 0;
+    max-inline-size: 42ch;
+    text-wrap: pretty;
+  }
+}

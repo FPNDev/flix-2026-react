@@ -1,0 +1,14 @@
+.container {
+  inline-size: 100%;
+  max-inline-size: var(--layout-max);
+  margin-inline: auto;
+  padding-inline: var(--layout-gutter);
+
+  &.narrow {
+    max-inline-size: 880px;
+  }
+
+  @include until('tablet') {
+    padding-inline: var(--layout-gutter-mobile);
+  }
+}

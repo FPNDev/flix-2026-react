@@ -1,0 +1,251 @@
+@use '../mixins' as *;
+
+.pplane {
+  position: absolute;
+  z-index: var(--z-modal);
+  inline-size: min(380px, calc(100% - var(--sp-8)));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--alpha-plum-96);
+  backdrop-filter: blur(var(--blur-lg));
+  border: var(--bw-hair) solid var(--border-default);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
+  // closed state
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(var(--sp-2)) scale(0.98);
+  transform-origin: bottom right;
+  transition:
+    opacity var(--dur-quick) var(--ease-standard),
+    transform var(--dur-quick) var(--ease-entrance),
+    visibility var(--dur-quick) var(--ease-standard);
+
+  // anchoring — above the transport row
+  &--br {
+    inset-block-end: calc(var(--control-h-lg) + var(--sp-8));
+    inset-inline-end: var(--sp-5);
+  }
+  &--bl {
+    inset-block-end: calc(var(--control-h-lg) + var(--sp-8));
+    inset-inline-start: var(--sp-5);
+    transform-origin: bottom left;
+  }
+  &--wide {
+    inline-size: min(440px, calc(100% - var(--sp-8)));
+  }
+  &--narrow {
+    inline-size: min(300px, calc(100% - var(--sp-8)));
+  }
+
+  // a beak pointing down at the control that opened it
+  &__beak {
+    position: absolute;
+    inset-block-end: calc(var(--sp-2) * -1);
+    inset-inline-end: var(--sp-7);
+    inline-size: var(--sp-4);
+    block-size: var(--sp-4);
+    background: var(--alpha-plum-96);
+    border-inline-end: var(--bw-hair) solid var(--border-default);
+    border-block-end: var(--bw-hair) solid var(--border-default);
+    transform: rotate(45deg);
+    border-end-end-radius: var(--radius-xs);
+  }
+
+  &__head {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    padding: var(--sp-4) var(--sp-4) var(--sp-3);
+    border-block-end: var(--bw-hair) solid var(--border-subtle);
+  }
+  &__title {
+    flex: 1;
+    min-inline-size: 0;
+    font-size: var(--fs-body-sm);
+    font-weight: var(--fw-bold);
+    letter-spacing: var(--ls-caps);
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+  }
+  &__body {
+    padding: var(--sp-2);
+    overflow-y: auto;
+    max-block-size: 320px;
+    &--flush {
+      padding: var(--sp-1);
+    }
+  }
+  &__foot {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    padding: var(--sp-3) var(--sp-4);
+    border-block-start: var(--bw-hair) solid var(--border-subtle);
+    background: var(--alpha-white-04);
+  }
+  &__note {
+    flex: 1;
+    font-size: var(--fs-caption);
+    color: var(--text-tertiary);
+  }
+
+  // inside a panel the quality rows lose their card chrome — the panel
+  // already provides the surface, so a second border is noise
+  .qopt {
+    background: transparent;
+    border-color: transparent;
+    border-radius: var(--radius-md);
+    @include on-hover {
+      border-color: transparent;
+      background: var(--surface-hover);
+    }
+    &.is-selected,
+    &:has(.qopt__pick:checked) {
+      background: var(--accent-subtle);
+      border-color: transparent;
+    }
+  }
+  .qsel__list {
+    gap: var(--sp-px);
+  }
+  .srclist {
+    border-block-start-color: var(--alpha-white-08);
+  }
+
+  @include until('tablet') {
+    position: fixed;
+    inset: auto 0 0 0;
+    inline-size: 100%;
+    max-inline-size: none;
+    border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+    border-inline: 0;
+    border-block-end: 0;
+    transform: translateY(100%);
+    transform-origin: bottom center;
+    transition: transform var(--dur-slow) var(--ease-entrance);
+    opacity: 1;
+    visibility: visible;
+    padding-block-end: env(safe-area-inset-bottom);
+    .pplane__beak {
+      display: none;
+    }
+    .pplane__body {
+      max-block-size: 60vh;
+    }
+  }
+}
+
+.overlay-toggle:checked ~ .pplane,
+.pplane.is-open {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+}
+@include until('tablet') {
+  .overlay-toggle:checked ~ .pplane,
+  .pplane.is-open {
+    transform: translateY(0);
+  }
+}
+
+.subs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sub {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-2) var(--sp-3);
+  min-block-size: var(--touch-min);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: var(--transition-color);
+
+  &__input {
+    position: absolute;
+    opacity: 0;
+    inline-size: 0;
+    block-size: 0;
+  }
+  &__mark {
+    flex: none;
+    inline-size: var(--sp-4);
+    block-size: var(--sp-4);
+    border-radius: var(--radius-circle);
+    border: var(--bw-thick) solid var(--border-input);
+    position: relative;
+    transition: var(--transition-color);
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 50% auto auto 50%;
+      inline-size: var(--sp-2);
+      block-size: var(--sp-2);
+      border-radius: var(--radius-circle);
+      background: var(--accent);
+      transform: translate(-50%, -50%) scale(0);
+      transition: transform var(--dur-quick) var(--ease-spring);
+    }
+  }
+  &__name {
+    flex: 1;
+    min-inline-size: 0;
+    font-size: var(--fs-body-sm);
+    font-weight: var(--fw-bold);
+    color: var(--text-secondary);
+    @include truncate;
+  }
+
+  @include on-hover {
+    background: var(--surface-hover);
+    .sub__name {
+      color: var(--text-primary);
+    }
+    .sub__mark {
+      border-color: var(--border-input-hover);
+    }
+  }
+  .sub__input:focus-visible ~ .sub__mark {
+    box-shadow: var(--focus-ring);
+  }
+  &.is-focus .sub__mark {
+    box-shadow: var(--focus-ring);
+  }
+
+  &:has(.sub__input:checked),
+  &.is-selected {
+    background: var(--accent-subtle);
+    .sub__mark {
+      border-color: var(--accent);
+      &::after {
+        transform: translate(-50%, -50%) scale(1);
+      }
+    }
+    .sub__name {
+      color: var(--text-primary);
+    }
+  }
+
+  // the Off row is separated from the tracks
+  &--off {
+    border-block-end: var(--bw-hair) solid var(--border-subtle);
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+    margin-block-end: var(--sp-1);
+    .sub__name {
+      color: var(--text-tertiary);
+    }
+    &:has(.sub__input:checked) .sub__name,
+    &.is-selected .sub__name {
+      color: var(--text-primary);
+    }
+  }
+}

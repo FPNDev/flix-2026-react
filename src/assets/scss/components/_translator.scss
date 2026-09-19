@@ -1,0 +1,203 @@
+@use '../mixins' as *;
+
+.tsel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  inline-size: 100%;
+  &__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-4);
+    flex-wrap: wrap;
+  }
+  &__note {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--sp-2);
+    font-size: var(--fs-caption);
+    color: var(--text-tertiary);
+  }
+}
+
+.trlist {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tr {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-2) var(--sp-3);
+  min-block-size: var(--touch-min);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: var(--transition-color);
+
+  &__input {
+    position: absolute;
+    opacity: 0;
+    inline-size: 0;
+    block-size: 0;
+  }
+  &__mark {
+    flex: none;
+    inline-size: var(--sp-4);
+    block-size: var(--sp-4);
+    border-radius: var(--radius-circle);
+    border: var(--bw-thick) solid var(--border-input);
+    position: relative;
+    transition: var(--transition-color);
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 50% auto auto 50%;
+      inline-size: var(--sp-2);
+      block-size: var(--sp-2);
+      border-radius: var(--radius-circle);
+      background: var(--accent);
+      transform: translate(-50%, -50%) scale(0);
+      transition: transform var(--dur-quick) var(--ease-spring);
+    }
+  }
+  &__main {
+    flex: 1;
+    min-inline-size: 0;
+    display: flex;
+    align-items: center;
+  }
+  &__name {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    font-size: var(--fs-body-sm);
+    font-weight: var(--fw-bold);
+    color: var(--text-secondary);
+    min-inline-size: 0;
+  }
+  &__title {
+    @include truncate;
+  }
+  &__right {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    flex: none;
+  }
+
+  &__lang {
+    display: inline-flex;
+    align-items: center;
+    block-size: var(--sp-5);
+    padding-inline: var(--sp-2);
+    border-radius: var(--radius-xs);
+    background: var(--alpha-white-08);
+    color: var(--text-secondary);
+    font-size: var(--fs-micro);
+    font-weight: var(--fw-black);
+    line-height: 1;
+    letter-spacing: var(--ls-wide);
+    text-transform: uppercase;
+    white-space: nowrap;
+    flex: none;
+    &--original {
+      background: var(--accent-subtle);
+      color: var(--text-accent);
+    }
+  }
+  @include on-hover {
+    background: var(--surface-hover);
+    .tr__name {
+      color: var(--text-primary);
+    }
+    .tr__mark {
+      border-color: var(--border-input-hover);
+    }
+  }
+  .tr__input:focus-visible ~ .tr__mark {
+    box-shadow: var(--focus-ring);
+  }
+  &.is-focus .tr__mark {
+    box-shadow: var(--focus-ring);
+  }
+
+  &:has(.tr__input:checked),
+  &.is-selected {
+    background: var(--accent-subtle);
+    .tr__mark {
+      border-color: var(--accent);
+      &::after {
+        transform: translate(-50%, -50%) scale(1);
+      }
+    }
+    .tr__name {
+      color: var(--text-primary);
+    }
+  }
+  &.is-playing .tr__name::after {
+    content: 'Playing';
+    font-size: var(--fs-micro);
+    font-weight: var(--fw-bold);
+    letter-spacing: var(--ls-wide);
+    text-transform: uppercase;
+    color: var(--text-accent);
+  }
+
+  &--unknown .tr__title {
+    color: var(--text-tertiary);
+    font-weight: var(--fw-semibold);
+  }
+
+  &.is-disabled,
+  &.is-unavailable {
+    cursor: not-allowed;
+    &:hover {
+      background: transparent;
+    }
+    .tr__name {
+      color: var(--text-disabled);
+    }
+  }
+
+  @include until('mobile') {
+    padding: var(--sp-2);
+  }
+}
+
+.trcurrent {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  block-size: var(--control-h-md);
+  padding-inline: var(--sp-3);
+  background: var(--surface-overlay);
+  border: var(--bw-hair) solid var(--border-default);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: var(--transition-color);
+
+  &__name {
+    font-size: var(--fs-body-sm);
+    font-weight: var(--fw-bold);
+    color: var(--text-secondary);
+    max-inline-size: 16ch;
+    @include truncate;
+  }
+  @include on-hover {
+    background: var(--ink-400);
+    border-color: var(--border-strong);
+    .trcurrent__name {
+      color: var(--text-primary);
+    }
+  }
+  @include on-focus {
+    @include focus-ring;
+  }
+}

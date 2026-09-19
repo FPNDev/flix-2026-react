@@ -1,0 +1,124 @@
+@use '../mixins' as *;
+
+.hero {
+  position: relative;
+  isolation: isolate;
+  border-radius: var(--radius-2xl);
+  overflow: hidden;
+  min-block-size: 420px;
+  display: flex;
+  align-items: flex-end;
+
+  &__art {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    background: linear-gradient(
+      135deg,
+      var(--violet-900),
+      var(--ink-200) 55%,
+      var(--ink-400)
+    );
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: repeating-linear-gradient(
+        115deg,
+        var(--alpha-white-04) 0 2px,
+        var(--alpha-plum-00) 2px 11px
+      );
+    }
+    > img {
+      position: absolute;
+      inset: 0;
+      inline-size: 100%;
+      block-size: 100%;
+      object-fit: cover;
+      object-position: 62% 18%;
+    }
+    &:has(img)::after {
+      display: none;
+    }
+  }
+  &__scrim {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+      var(--media-protection-side), var(--media-protection),
+      var(--hero-vignette);
+  }
+  &__inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+    padding: var(--sp-9);
+    max-inline-size: 620px;
+  }
+  &__kicker {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+  }
+  &__title {
+    font-family: var(--font-display);
+    font-size: var(--fs-display-2);
+    font-weight: var(--fw-black);
+    line-height: var(--lh-tight);
+    letter-spacing: var(--ls-display);
+    margin: 0;
+    text-wrap: balance;
+  }
+  &__synopsis {
+    font-size: var(--fs-body-lg);
+    font-weight: var(--fw-regular);
+    line-height: var(--lh-relaxed);
+    color: var(--text-secondary);
+    margin: 0;
+    text-wrap: pretty;
+    @include clamp-lines(3);
+  }
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    flex-wrap: wrap;
+    margin-block-start: var(--sp-2);
+  }
+  &__facets {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    flex-wrap: wrap;
+  }
+
+  &--compact {
+    min-block-size: 280px;
+    .hero__title {
+      font-size: var(--fs-h1);
+    }
+    .hero__inner {
+      padding: var(--sp-6);
+    }
+  }
+
+  @include until('tablet') {
+    min-block-size: 340px;
+    border-radius: var(--radius-lg);
+    .hero__inner {
+      padding: var(--sp-5);
+      gap: var(--sp-3);
+    }
+    .hero__title {
+      font-size: var(--fs-h1);
+    }
+    .hero__synopsis {
+      font-size: var(--fs-body-sm);
+      @include clamp-lines(2);
+    }
+    .hero__scrim {
+      background: var(--media-protection), var(--hero-vignette);
+    }
+  }
+}
