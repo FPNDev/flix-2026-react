@@ -27,6 +27,7 @@ export function useMagnetPlayer({
   const { addToast } = useToast();
 
   const [activeURI, setActiveURI] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const { files, selectedFileIndex, selectFile, fetchFiles, navigateFiles } =
     useVideoFileSelection();
@@ -54,6 +55,8 @@ export function useMagnetPlayer({
   };
 
   const onLoad = () => {
+    setIsLoading(false);
+
     const video = player?.getMediaElement();
     if (!video) {
       return;
@@ -67,12 +70,15 @@ export function useMagnetPlayer({
       return;
     }
     playerQueue.add(() => player.unload());
+    setIsLoading(false);
   };
 
   const load = (uri: string, file?: MediaFile) => {
     if (!player || !playerQueue || !uri) {
       return;
     }
+
+    setIsLoading(true);
 
     playerQueue.add(() =>
       player
@@ -130,10 +136,8 @@ export function useMagnetPlayer({
       return;
     }
 
-    return () => {
-      playerQueue.add(() => player.unload());
-    };
-  }, [player, playerQueue]);
+    return unload;
+  }, [player, playerQueue, unload]);
 
   return {
     activeURI,
@@ -142,5 +146,6 @@ export function useMagnetPlayer({
     selectFile: playFile,
     prepareAndPlay,
     navigateFiles: playNextFile,
+    isLoading,
   };
 }

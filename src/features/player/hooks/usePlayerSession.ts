@@ -28,6 +28,7 @@ export function usePlayerSession({
     selectFile,
     prepareAndPlay,
     navigateFiles,
+    isLoading,
   } = useMagnetPlayer({
     player,
     playerQueue,
@@ -69,5 +70,6 @@ export function usePlayerSession({
     selectedAudioTrackIndex,
     selectAudioTrack,
     player,
+    isLoading,
   };
 }

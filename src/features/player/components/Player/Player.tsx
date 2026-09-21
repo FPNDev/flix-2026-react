@@ -34,6 +34,7 @@ export function Player() {
     selectedAudioTrackIndex,
     selectAudioTrack,
     player,
+    isLoading,
   } = usePlayerSession({ video, playerContainer, magnetURI });
 
   const focusPlayer = () => {
@@ -48,7 +49,10 @@ export function Player() {
     ev.preventDefault();
     focusPlayer();
 
-    if (activeURI === magnetURI && player && isShakaActive(player)) {
+    if (
+      activeURI === magnetURI &&
+      ((player && isShakaActive(player)) || isLoading)
+    ) {
       const fileName = files.length ? files[selectedFileIndex].name : magnetURI;
       addToast({
         icon: 'playlist_remove',
