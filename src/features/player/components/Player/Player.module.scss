@@ -9,7 +9,9 @@
   z-index: var(--z-base);
 
   &::cue {
-    font-size: 2vw;
+    font-size: 1.75rem;
+    font-family: var(--font-ui);
+    line-height: var(--lh-normal);
   }
 }
 
