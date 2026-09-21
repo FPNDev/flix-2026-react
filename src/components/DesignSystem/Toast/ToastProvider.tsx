@@ -1,4 +1,4 @@
-import { useLayoutEffect, useReducer, useRef } from 'react';
+import { useReducer, useRef } from 'react';
 import { ToastStatus, type ToastInfo, type ToastState } from './Toast.types';
 import { DEFAULTS } from './Toast.constants';
 import { ToastDispatchContext, ToastStatesContext } from './ToastContext';
@@ -38,15 +38,11 @@ export function ToastProvider({
 }: Props) {
   const toastIdRef = useRef(0);
   const [toasts, dispatch] = useReducer(toastsReducer, []);
-  const timeoutMapRef = useRef<WeakMap<ToastState, number>>(null);
-
-  useLayoutEffect(() => {
-    timeoutMapRef.current = new WeakMap();
-  }, []);
+  const timeoutMapRef = useRef<WeakMap<ToastState, number>>(new WeakMap());
 
   const clearRemovalTimeout = (toast: ToastState) => {
     const timeoutMap = timeoutMapRef.current;
-    if (toast.status !== ToastStatus.Active || !timeoutMap) {
+    if (toast.status !== ToastStatus.Active) {
       return;
     }
 
@@ -56,11 +52,7 @@ export function ToastProvider({
 
   const startRemovalTimeout = (toast: ToastState) => {
     const timeoutMap = timeoutMapRef.current;
-    if (
-      !timeoutMap ||
-      toast.status !== ToastStatus.Active ||
-      timeoutMap.has(toast)
-    ) {
+    if (toast.status !== ToastStatus.Active || timeoutMap.has(toast)) {
       return;
     }
 
@@ -106,8 +98,8 @@ export function ToastProvider({
   };
 
   return (
-    <ToastStatesContext.Provider value={toasts}>
-      <ToastDispatchContext.Provider
+    <ToastStatesContext value={toasts}>
+      <ToastDispatchContext
         value={{
           addToast,
           markForRemoval,
@@ -117,7 +109,7 @@ export function ToastProvider({
         }}
       >
         {children}
-      </ToastDispatchContext.Provider>
-    </ToastStatesContext.Provider>
+      </ToastDispatchContext>
+    </ToastStatesContext>
   );
 }

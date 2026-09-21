@@ -1,12 +1,36 @@
 import { useToast } from '@/components/DesignSystem/Toast';
 import { addKeys } from '@/utils/list';
-import { useEffect, useState } from 'react';
-import shaka from 'shaka-player';
+import type shaka from 'shaka-player';
 import { isActiveTrack } from '../utils/tracks';
+import { usePlayerSubscription } from './usePlayerSubscription';
+import { isShakaActive } from '../utils/shaka';
 
 type UseAudioTrackSelectionProps = {
-  player: shaka.Player | null;
+  player?: shaka.Player;
 };
+
+type AudioTrackSelection = {
+  tracks: (shaka.extern.AudioTrack & {
+    key: string;
+  })[];
+  activeIndex: number;
+};
+
+const AUDIO_TRACK_EVENTS = ['audiotrackschanged', 'unloading'];
+
+const NO_AUDIO_TRACKS: AudioTrackSelection = { tracks: [], activeIndex: 0 };
+
+function getAudioTrackSelection(player: shaka.Player): AudioTrackSelection {
+  const tracks = isShakaActive(player) ? player.getAudioTracks() : [];
+
+  return {
+    tracks: addKeys(
+      tracks,
+      (track) => `${track.id ?? track.language}-${track.label}`,
+    ),
+    activeIndex: Math.max(0, tracks.findIndex(isActiveTrack)),
+  };
+}
 
 /**
  * Provides a layer for audio track selection within Shaka player
@@ -16,54 +40,38 @@ export function useAudioTrackSelection({
 }: UseAudioTrackSelectionProps) {
   const { addToast } = useToast();
 
-  const [audioTracks, setAudioTracks] = useState<
-    (shaka.extern.AudioTrack & { key: string })[]
-  >([]);
-  const [selectedAudioTrackIndex, setSelectedAudioTrackIndex] =
-    useState<number>(0);
-
-  useEffect(() => {
-    if (!player) {
-      return;
-    }
-
-    const onTracksChanged = () => {
-      const tracks = player.getAudioTracks();
-      setAudioTracks(addKeys(tracks));
-      setSelectedAudioTrackIndex(tracks.findIndex(isActiveTrack));
-    };
-
-    const onUnloading = () => {
-      setAudioTracks([]);
-      setSelectedAudioTrackIndex(0);
-    };
-
-    player.addEventListener('trackschanged', onTracksChanged);
-    player.addEventListener('unloading', onUnloading);
-
-    return () => {
-      player.removeEventListener('trackschanged', onTracksChanged);
-      player.removeEventListener('unloading', onUnloading);
-    };
-  }, [player]);
+  const {
+    snapshot: { tracks: audioTracks, activeIndex: selectedAudioTrackIndex },
+    refresh: refreshAudioTrack,
+  } = usePlayerSubscription<AudioTrackSelection>({
+    player,
+    events: AUDIO_TRACK_EVENTS,
+    selector: getAudioTrackSelection,
+    fallback: NO_AUDIO_TRACKS,
+  });
 
   const selectAudioTrack = (selectedIndex: number) => {
     if (!player) {
       return;
     }
 
+    const trackLanguageSuffix = audioTracks[selectedIndex].language
+      ? `- ${audioTracks[selectedIndex].language}`
+      : '';
+    const audioTrackName = `${audioTracks[selectedIndex].label}${trackLanguageSuffix}`;
+
     try {
       player.selectAudioTrack(audioTracks[selectedIndex], 1);
-      setSelectedAudioTrackIndex(selectedIndex);
+      refreshAudioTrack();
 
       addToast({
         icon: 'queue_music',
-        text: `Switched audio to ${audioTracks[selectedIndex].label}`,
+        text: `Switched audio to ${audioTrackName}`,
       });
     } catch (err) {
       addToast({
         icon: 'music_off',
-        text: `Failed to switch audio to ${audioTracks[selectedIndex].label}`,
+        text: `Failed to switch audio to ${audioTrackName}`,
         variant: 'danger',
       });
       console.error(err);

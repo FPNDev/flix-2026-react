@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
+  "plugins": ["react", "typescript", "oxc", "unicorn"],
   "rules": {
     "react/use-memo": "off",
     "react/exhaustive-deps": "off",
@@ -8,7 +8,9 @@
     "react/only-export-components": ["warn", { "allowConstantExport": true }],
     "react/syntax": "error",
     "react/refs": "error",
-    "react/exhaustive-effect-dependencies": "error"
+    "react/exhaustive-effect-dependencies": "error",
+    "curly": ["error", "all"],
+    "unicorn/no-array-for-each": "error"
   },
   "ignorePatterns": ["dist/*", "scripts/*"]
 }
