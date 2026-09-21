@@ -1,22 +1,30 @@
-import { useState, useEffect } from 'react';
+import { useSyncExternalStore } from 'react';
 import { createPortal } from 'react-dom';
+import { getFullscreenElement } from '@/utils/fullscreen';
+
+const FULLSCREEN_EVENTS = [
+  'fullscreenchange',
+  'webkitfullscreenchange',
+  'MSFullscreenChange',
+];
+
+const subscribeFullscreen = (onFullscreenChange: () => void) => {
+  for (const eventName of FULLSCREEN_EVENTS) {
+    document.addEventListener(eventName, onFullscreenChange);
+  }
+
+  return () => {
+    for (const eventName of FULLSCREEN_EVENTS) {
+      document.removeEventListener(eventName, onFullscreenChange);
+    }
+  };
+};
 
 export const FullscreenPortal = ({ children }: React.PropsWithChildren) => {
-  const [fullscreenElement, setFullscreenElement] = useState<Element | null>(
-    null,
+  const fullscreenElement = useSyncExternalStore(
+    subscribeFullscreen,
+    getFullscreenElement,
   );
-
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setFullscreenElement(document.fullscreenElement);
-    };
-    handleFullscreenChange();
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-
-    return () => {
-      document.removeEventListener('fullscreenchange', handleFullscreenChange);
-    };
-  }, []);
 
   if (fullscreenElement) {
     return createPortal(children, fullscreenElement);

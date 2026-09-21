@@ -2,14 +2,15 @@ import type { Queue } from '@/utils/queue';
 import { useEffect, useState } from 'react';
 import shaka from 'shaka-player';
 import { useToast } from '@/components/DesignSystem/Toast';
+import type { MediaFile } from '@/types/media';
 import { useVideoFileSelection } from './useVideoFileSelection';
 import { magnetRemuxerURI } from '../api/urls';
 import { isRemuxerError, parseShakaNetworkError } from '../utils/httpErrors';
 import { isShakaError } from '../utils/playerErrors';
 
 type UseMagnetPlayerProps = {
-  player: shaka.Player | null;
-  playerQueue: Queue | null;
+  player?: shaka.Player;
+  playerQueue?: Queue;
   magnetURI: string;
   multiple?: boolean;
 };
@@ -27,13 +28,8 @@ export function useMagnetPlayer({
 
   const [activeURI, setActiveURI] = useState('');
 
-  const {
-    files,
-    selectedFileIndex,
-    setSelectedFileIndex,
-    fetchFiles,
-    navigateFiles,
-  } = useVideoFileSelection();
+  const { files, selectedFileIndex, selectFile, fetchFiles, navigateFiles } =
+    useVideoFileSelection();
 
   const handleShakaError = (err: unknown) => {
     let errorText = 'Failed loading specified link';
@@ -66,8 +62,15 @@ export function useMagnetPlayer({
     video.play();
   };
 
-  const playSelectedFile = async () => {
+  const unload = () => {
     if (!player || !playerQueue) {
+      return;
+    }
+    playerQueue.add(() => player.unload());
+  };
+
+  const load = (uri: string, file?: MediaFile) => {
+    if (!player || !playerQueue || !uri) {
       return;
     }
 
@@ -75,55 +78,69 @@ export function useMagnetPlayer({
       player
         .load(
           magnetRemuxerURI('m3u8', {
-            magnet: activeURI,
-            ...(selectedFileIndex !== undefined
-              ? { file: selectedFileIndex }
-              : {}),
+            magnet: uri,
+            ...(file ? { file: file.index } : {}),
           }),
         )
         .then(onLoad, handleShakaError),
     );
   };
 
-  // Set player active URL and start fetching files
-  const prepareAndPlay = () => {
+  // Set player active URL, pick a file and start playing it
+  const prepareAndPlay = async () => {
     setActiveURI(magnetURI);
+
+    if (!multiple) {
+      addToast({
+        icon: 'playlist_play',
+        text: 'Playing ' + magnetURI,
+        variant: 'success',
+      });
+      load(magnetURI);
+      return;
+    }
+
+    unload();
+
+    const playableFiles = await fetchFiles(magnetURI);
+    if (!playableFiles.length) {
+      return;
+    }
+
+    load(magnetURI, selectFile(0, playableFiles));
+  };
+
+  const playFile = (index: number) => {
+    const file = selectFile(index);
+    if (file) {
+      load(activeURI, file);
+    }
+  };
+
+  // Handle file navigation
+  const playNextFile = (direction: -1 | 1) => {
+    const file = navigateFiles(direction);
+    if (file) {
+      load(activeURI, file);
+    }
   };
 
   useEffect(() => {
-    if (multiple) {
-      fetchFiles(activeURI);
-    } else {
-      addToast({
-        icon: 'playlist_play',
-        text: 'Playing ' + activeURI,
-        variant: 'success',
-      });
-    }
-  }, [activeURI, multiple, addToast, fetchFiles]);
-
-  // Handle file navigation
-  useEffect(() => {
-    if (!player || !playerQueue || !player.getMediaElement()) {
+    if (!player || !playerQueue) {
       return;
     }
 
-    playerQueue.add(() => player.unload());
-    if (!activeURI) {
-      return;
-    }
-
-    playSelectedFile();
-  }, [player, playerQueue, activeURI, playSelectedFile]);
-
-  // Update current video track when it changes
+    return () => {
+      playerQueue.add(() => player.unload());
+    };
+  }, [player, playerQueue]);
 
   return {
     activeURI,
     files,
     selectedFileIndex,
-    setSelectedFileIndex,
+    selectFile: playFile,
     prepareAndPlay,
-    navigateFiles,
+    navigateFiles: playNextFile,
   };
 }

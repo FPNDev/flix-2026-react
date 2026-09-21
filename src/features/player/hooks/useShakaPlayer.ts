@@ -1,11 +1,18 @@
 import { queue, type Queue } from '@/utils/queue';
-import { useLayoutEffect, useRef } from 'react';
+import { createStore } from '@/utils/store';
+import { useLayoutEffect, useState, useSyncExternalStore } from 'react';
 import shaka from 'shaka-player';
+import { useToast } from '@/components/DesignSystem/Toast';
 import { SHAKA_CONFIG } from '../config/shaka';
 
 type UseShakaPlayerProps = {
   video?: HTMLVideoElement;
 };
+
+type PlayerInstance = {
+  player: shaka.Player;
+  playerQueue: Queue;
+} | null;
 
 shaka.polyfill.installAll();
 
@@ -14,41 +21,51 @@ shaka.polyfill.installAll();
  * Detach/attach & destroy implemented
  */
 export function useShakaPlayer({ video }: UseShakaPlayerProps) {
-  const playerRef = useRef<shaka.Player>(null);
-  const playerQueueRef = useRef<Queue>(null);
+  const { addToast } = useToast();
+
+  const [store] = useState(() => createStore<PlayerInstance>(null));
+  const { player, playerQueue } =
+    useSyncExternalStore(store.subscribe, store.getSnapshot) ?? {};
 
   // Create a new Shaka Player instance and configure it when the component mounts
   useLayoutEffect(() => {
     if (!shaka.Player.isBrowserSupported()) {
+      addToast({
+        icon: 'play_disabled',
+        text: 'Browser does not support playback',
+        variant: 'danger',
+      });
       return;
     }
 
-    const player = (playerRef.current = new shaka.Player());
-    const playerQueue = (playerQueueRef.current = queue());
+    const newPlayer = new shaka.Player();
+    const newPlayerQueue = queue();
 
-    player.configure(SHAKA_CONFIG);
-    (window as any)['shaka'] = player;
+    newPlayer.configure(SHAKA_CONFIG);
+    if (import.meta.env.DEV) {
+      (window as any)['__shakaPlayer'] = newPlayer;
+    }
+
+    store.set({ player: newPlayer, playerQueue: newPlayerQueue });
 
     return () => {
-      playerQueue.add(() => player.destroy());
+      store.set(null);
+      newPlayerQueue.add(() => newPlayer.destroy());
     };
-  }, []);
+  }, [addToast, store]);
 
   // Attach the Shaka Player to the video element when it changes
   useLayoutEffect(() => {
-    if (!video) {
+    if (!video || !player || !playerQueue) {
       return;
     }
 
-    const player = playerRef.current;
-    const playerQueue = playerQueueRef.current;
-
-    playerQueue!.add(() => player!.attach(video));
+    playerQueue.add(() => player.attach(video));
 
     return () => {
-      playerQueue!.add(() => player!.detach());
+      playerQueue.add(() => player.detach());
     };
-  }, [video]);
+  }, [video, player, playerQueue]);
 
-  return { playerRef, playerQueueRef };
+  return { player, playerQueue };
 }

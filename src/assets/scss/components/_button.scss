@@ -27,6 +27,7 @@
   transition:
     var(--transition-color),
     transform var(--dur-fast) var(--ease-standard);
+  user-select: none;
 
   @include on-press {
     transform: scale(0.97);

@@ -1,7 +1,7 @@
 import { useToast } from '@/components/DesignSystem/Toast';
 import type { FilesResponse, MediaFile } from '@/types/media';
 import { isAbortError, renewAbortController } from '@/utils/abort';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { fetchMediaFiles } from '../api/playerApi';
 
 /**
@@ -20,7 +20,7 @@ export function useVideoFileSelection() {
     setSelectedFileIndex(0);
 
     if (!magnetURI) {
-      return;
+      return [];
     }
 
     try {
@@ -39,6 +39,8 @@ export function useVideoFileSelection() {
           variant: 'danger',
         });
       }
+
+      return playableFiles;
     } catch (err) {
       if (!isAbortError(err)) {
         addToast({
@@ -48,7 +50,26 @@ export function useVideoFileSelection() {
         });
         console.error(err);
       }
+
+      return [];
     }
+  };
+
+  const selectFile = (index: number, fileList: MediaFile[] = files) => {
+    const file = fileList[index];
+    if (!file) {
+      return;
+    }
+
+    setSelectedFileIndex(index);
+
+    addToast({
+      icon: 'playlist_play',
+      text: 'Playing ' + file.name,
+      variant: 'success',
+    });
+
+    return file;
   };
 
   const navigateFiles = (direction: -1 | 1) => {
@@ -56,27 +77,21 @@ export function useVideoFileSelection() {
       return;
     }
 
-    setSelectedFileIndex((prevIndex) => {
-      return Math.max(0, Math.min(files.length - 1, prevIndex + direction));
-    });
-  };
-
-  useEffect(() => {
-    if (!files.length) {
+    const nextIndex = Math.max(
+      0,
+      Math.min(files.length - 1, selectedFileIndex + direction),
+    );
+    if (nextIndex === selectedFileIndex) {
       return;
     }
 
-    addToast({
-      icon: 'playlist_play',
-      text: 'Playing ' + files[selectedFileIndex].name,
-      variant: 'success',
-    });
-  }, [selectedFileIndex, files, addToast]);
+    return selectFile(nextIndex);
+  };
 
   return {
     files,
     selectedFileIndex,
-    setSelectedFileIndex,
+    selectFile,
     navigateFiles,
     fetchFiles,
   };

@@ -28,11 +28,16 @@ export function toggleFullscreen(element: Element) {
     : requestFullscreen(element);
 }
 
-export function isFullscreen(element?: Element) {
-  const fullscreenElement =
+export function getFullscreenElement() {
+  return (
     document.fullscreenElement ||
     document.webkitFullscreenElement ||
-    document.msFullscreenElement;
+    document.msFullscreenElement
+  );
+}
+
+export function isFullscreen(element?: Element) {
+  const fullscreenElement = getFullscreenElement();
 
   return element ? fullscreenElement === element : !!fullscreenElement;
 }

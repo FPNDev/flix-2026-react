@@ -12,7 +12,7 @@ export async function fetchMediaFiles<T>(
     },
   );
 
-  handleHttpError(response);
+  await handleHttpError(response);
 
-  return response.json() as T;
+  return (await response.json()) as T;
 }

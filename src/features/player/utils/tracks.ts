@@ -1,11 +1,16 @@
 import type shaka from 'shaka-player';
+import { isShakaActive } from './shaka';
 
 export function getCurrentVideoTrack(player: shaka.Player) {
-  return player.getVideoTracks().find(isActiveTrack);
+  return isShakaActive(player)
+    ? player.getVideoTracks().find(isActiveTrack)
+    : undefined;
 }
 
 export function getCurrentAudioTrack(player: shaka.Player) {
-  return player.getAudioTracks().find(isActiveTrack);
+  return isShakaActive(player)
+    ? player.getAudioTracks().find(isActiveTrack)
+    : undefined;
 }
 
 export function isActiveTrack(

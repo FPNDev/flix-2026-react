@@ -24,3 +24,7 @@ dist-ssr
 *.sw?
 
 .env
+.claude
+CLAUDE.md
+.pre-commit-config.yaml
+scripts

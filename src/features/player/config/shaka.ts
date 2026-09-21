@@ -8,7 +8,7 @@ export const SHAKA_CONFIG = {
       stallTimeout: 0,
       timeout: 150_000,
     },
-    segmentPrefetchLimit: 3,
+    segmentPrefetchLimit: 2,
   },
   manifest: {
     retryParameters: {

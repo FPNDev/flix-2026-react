@@ -87,7 +87,9 @@ export const PLAYER_CONTROL_KEYS: KeyActions = {
     });
   },
   Space: ({ event, video }) => {
-    event.preventDefault();
+    if (event.target === video) {
+      return;
+    }
 
     if (
       video.paused &&
@@ -100,11 +102,15 @@ export const PLAYER_CONTROL_KEYS: KeyActions = {
     }
   },
   ArrowLeft: ({ video, event }) => {
-    event.preventDefault();
+    if (event.target === video) {
+      return;
+    }
     video.currentTime -= SEEK_STEP;
   },
   ArrowRight: ({ video, event }) => {
-    event.preventDefault();
+    if (event.target === video) {
+      return;
+    }
     video.currentTime += SEEK_STEP;
   },
   Comma: ({ video, frameRate }) => {
