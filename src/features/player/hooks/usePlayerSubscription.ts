@@ -4,7 +4,7 @@ import { useEffect, useState, useSyncExternalStore } from 'react';
 import type shaka from 'shaka-player';
 
 type UsePlayerSubscriptionProps<T> = {
-  player?: Maybe<shaka.Player>;
+  player: shaka.Player | undefined;
   events: string[];
   selector: (player: shaka.Player) => T;
   fallback: T;

@@ -1,17 +1,16 @@
 import type { Queue } from '@/utils/queue';
 import { useEffect, useState } from 'react';
-import shaka from 'shaka-player';
 import { useToast } from '@/components/DesignSystem/Toast';
 import type { MediaFile } from '@/types/media';
 import { useVideoFileSelection } from './useVideoFileSelection';
 import { magnetRemuxerURI } from '../api/urls';
 import { isRemuxerError, parseShakaNetworkError } from '../utils/httpErrors';
 import { isShakaError } from '../utils/playerErrors';
+import shaka from 'shaka-player';
 
 type UseMagnetPlayerProps = {
-  player?: shaka.Player;
-  playerQueue?: Queue;
-  magnetURI: string;
+  player: shaka.Player | undefined;
+  playerQueue: Queue | undefined;
   multiple?: boolean;
 };
 
@@ -21,7 +20,6 @@ type UseMagnetPlayerProps = {
 export function useMagnetPlayer({
   player,
   playerQueue,
-  magnetURI,
   multiple,
 }: UseMagnetPlayerProps) {
   const { addToast } = useToast();
@@ -92,7 +90,7 @@ export function useMagnetPlayer({
   };
 
   // Set player active URL, pick a file and start playing it
-  const prepareAndPlay = async () => {
+  const playFromURL = async (magnetURI: string) => {
     setActiveURI(magnetURI);
 
     if (!multiple) {
@@ -123,7 +121,7 @@ export function useMagnetPlayer({
   };
 
   // Handle file navigation
-  const playNextFile = (direction: -1 | 1) => {
+  const navigateAndPlayFile = (direction: -1 | 1) => {
     const file = navigateFiles(direction);
     if (file) {
       load(activeURI, file);
@@ -143,8 +141,8 @@ export function useMagnetPlayer({
     files,
     selectedFileIndex,
     selectFile: playFile,
-    prepareAndPlay,
-    navigateFiles: playNextFile,
+    navigateFiles: navigateAndPlayFile,
+    playFromURL,
     isLoading,
   };
 }

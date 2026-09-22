@@ -1,31 +1,31 @@
-import type shaka from 'shaka-player';
 import { GiB } from '@/constants/filesize';
 import { Row } from '@/components/DesignSystem/Layout';
-import type { MediaFile } from '@/types/media';
+import { usePlayerActions, usePlayerState } from '../context/PlayerContext';
 
-type Props = {
-  files: MediaFile[];
-  selectedFileIndex: number;
-  onFileIndexChange: (ev: React.ChangeEvent<HTMLSelectElement>) => void;
-  audioTracks: (shaka.extern.AudioTrack & { key: string })[];
-  selectedAudioTrackIndex: number;
-  onAudioTrackIndexChange: (ev: React.ChangeEvent<HTMLSelectElement>) => void;
-};
+export function TrackSelectors() {
+  const { files, selectedFileIndex, audioTracks, selectedAudioTrackIndex } =
+    usePlayerState();
 
-export function TrackSelectors({
-  files,
-  selectedFileIndex,
-  onFileIndexChange,
-  audioTracks,
-  selectedAudioTrackIndex,
-  onAudioTrackIndexChange,
-}: Props) {
+  const { selectAudioTrack, selectFile, focusPlayer } = usePlayerActions();
+
+  const onAudioTrackIndexChanged = (
+    ev: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    selectAudioTrack(+ev.target.value);
+    focusPlayer();
+  };
+
+  const onFileIndexChanged = (ev: React.ChangeEvent<HTMLSelectElement>) => {
+    selectFile(+ev.target.value);
+    focusPlayer();
+  };
+
   return (
     <Row spacing={2} equal>
       <select
         name="fileIndex"
         value={selectedFileIndex}
-        onChange={onFileIndexChange}
+        onChange={onFileIndexChanged}
       >
         <option hidden>Select File</option>
         {files.map((file, index) => (
@@ -38,7 +38,7 @@ export function TrackSelectors({
       <select
         name="audioTrackIndex"
         value={selectedAudioTrackIndex}
-        onChange={onAudioTrackIndexChange}
+        onChange={onAudioTrackIndexChanged}
       >
         <option hidden>Select Audio Track</option>
         {audioTracks.map((audioTrack, index) => (

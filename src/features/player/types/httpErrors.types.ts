@@ -1,8 +1,8 @@
-export interface ShakaHttpError<T> {
+export type ShakaHttpError<T> = {
   status: number | null;
   data?: T;
-}
+};
 
-export interface RemuxerError {
+export type RemuxerError = {
   error: string;
-}
+};

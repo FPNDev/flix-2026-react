@@ -1,4 +1,4 @@
-import shaka from 'shaka-player';
+import type shaka from 'shaka-player';
 
 export function isShakaError(error: unknown): error is shaka.util.Error {
   return (

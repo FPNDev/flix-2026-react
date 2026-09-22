@@ -6,7 +6,7 @@ import { useToast } from '@/components/DesignSystem/Toast';
 import { SHAKA_CONFIG } from '../config/shaka';
 
 type UseShakaPlayerProps = {
-  video?: HTMLVideoElement;
+  video: HTMLVideoElement | undefined;
 };
 
 type PlayerInstance = {

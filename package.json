@@ -13,8 +13,7 @@
     "clsx": "^2.1.1",
     "magnet-uri": "^7.0.10",
     "react": "^19.3.0",
-    "react-dom": "^19.3.0",
-    "shaka-player": "^5.2.10"
+    "react-dom": "^19.3.0"
   },
   "devDependencies": {
     "@babel/core": "^7.29.7",
@@ -31,15 +30,11 @@
     "oxlint": "^1.83.0",
     "prettier": "^3.9.8",
     "sass": "^1.104.1",
+    "shaka-player": "^5.2.11",
     "typescript": "~6.0.2",
     "vite": "^8.3.0"
   },
   "allowScripts": {
-    "bufferutil@4.1.0": true,
-    "ip-set@3.0.0": true,
-    "node-datachannel@0.32.3": true,
-    "utf-8-validate@6.0.6": true,
-    "utp-native@2.5.3": true,
     "@parcel/watcher@2.6.0": true
   }
 }
