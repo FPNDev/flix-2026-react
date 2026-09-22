@@ -5,7 +5,7 @@ import { usePlayerSubscription } from './usePlayerSubscription';
 const VIDEO_TRACK_EVENTS = ['trackschanged', 'adaptation', 'unloading'];
 
 type Props = {
-  player?: shaka.Player;
+  player: shaka.Player | undefined;
 };
 export function useCurrentVideoTrack({ player }: Props) {
   const { snapshot: videoTrack } = usePlayerSubscription<

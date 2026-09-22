@@ -1,17 +1,16 @@
 import type { Queue } from '@/utils/queue';
 import { useEffect, useState } from 'react';
-import shaka from 'shaka-player';
 import { useToast } from '@/components/DesignSystem/Toast';
 import type { MediaFile } from '@/types/media';
 import { useVideoFileSelection } from './useVideoFileSelection';
 import { remuxerURI } from '../api/urls';
 import { isRemuxerError, parseShakaNetworkError } from '../utils/httpErrors';
 import { isShakaError } from '../utils/playerErrors';
+import shaka from 'shaka-player';
 
 type UseSourcePlayerProps = {
-  player?: shaka.Player;
-  playerQueue?: Queue;
-  sourceURI: string;
+  player: shaka.Player | undefined;
+  playerQueue: Queue | undefined;
   multiple?: boolean;
 };
 
@@ -21,7 +20,6 @@ type UseSourcePlayerProps = {
 export function useSourcePlayer({
   player,
   playerQueue,
-  sourceURI,
   multiple,
 }: UseSourcePlayerProps) {
   const { addToast } = useToast();
@@ -92,7 +90,7 @@ export function useSourcePlayer({
   };
 
   // Set player active URL, pick a file and start playing it
-  const prepareAndPlay = async () => {
+  const playFromURL = async (sourceURI: string) => {
     setActiveURI(sourceURI);
 
     if (!multiple) {
@@ -123,7 +121,7 @@ export function useSourcePlayer({
   };
 
   // Handle file navigation
-  const playNextFile = (direction: -1 | 1) => {
+  const navigateAndPlayFile = (direction: -1 | 1) => {
     const file = navigateFiles(direction);
     if (file) {
       load(activeURI, file);
@@ -143,8 +141,8 @@ export function useSourcePlayer({
     files,
     selectedFileIndex,
     selectFile: playFile,
-    prepareAndPlay,
-    navigateFiles: playNextFile,
+    navigateFiles: navigateAndPlayFile,
+    playFromURL,
     isLoading,
   };
 }

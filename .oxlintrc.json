@@ -12,5 +12,5 @@
     "curly": ["error", "all"],
     "unicorn/no-array-for-each": "error"
   },
-  "ignorePatterns": ["dist/*", "scripts/*"]
+  "ignorePatterns": ["dist/*", "scripts/*", "src/vendor/*"]
 }

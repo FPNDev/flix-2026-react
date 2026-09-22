@@ -1,7 +1,7 @@
 import { FullscreenPortal } from './components/DesignSystem/FullscreenPortal';
 import { ToastContainer, ToastProvider } from './components/DesignSystem/Toast';
 import classes from './App.module.scss';
-import { Player } from './features/player/components/Player';
+import { PlayerWithForm } from './features/player/components/PlayerWithForm';
 
 function App() {
   return (
@@ -10,7 +10,7 @@ function App() {
         <ToastContainer />
       </FullscreenPortal>
       <div className={classes.page}>
-        <Player />
+        <PlayerWithForm />
       </div>
     </ToastProvider>
   );

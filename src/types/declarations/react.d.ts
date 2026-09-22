@@ -1,7 +1,1 @@
-import 'react';
-
-module 'react' {
-  interface CSSProperties {
-    [key: `--${string}`]: string | number;
-  }
-}
+type WithKey<T> = T & { key: string | number };

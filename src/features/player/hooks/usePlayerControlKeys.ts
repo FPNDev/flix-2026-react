@@ -4,8 +4,8 @@ import { addExclusiveKeyUpListener } from '@/utils/keyboard';
 import { useEffect } from 'react';
 
 type UsePlayerHotkeysProps = {
-  video?: HTMLVideoElement;
-  playerContainer?: HTMLElement;
+  video: HTMLVideoElement | undefined;
+  playerContainer: HTMLElement | undefined;
   frameRate: number;
   navigateFiles: (direction: 1 | -1) => void;
   navigateAudioTracks: (direction: 1 | -1) => void;

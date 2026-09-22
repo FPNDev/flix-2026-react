@@ -6,7 +6,7 @@ import { usePlayerSubscription } from './usePlayerSubscription';
 import { isShakaActive } from '../utils/shaka';
 
 type UseAudioTrackSelectionProps = {
-  player?: shaka.Player;
+  player: shaka.Player | undefined;
 };
 
 type AudioTrackSelection = {

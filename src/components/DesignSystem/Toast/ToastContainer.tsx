@@ -3,10 +3,10 @@ import { Toast } from './Toast';
 import { useToastStates } from './ToastContext';
 
 type Props = {
-  offset: string;
+  offset?: string;
 };
 
-export function ToastContainer({ offset }: Props) {
+export function ToastContainer({ offset = '0' }: Props) {
   const toasts = useToastStates();
 
   return (

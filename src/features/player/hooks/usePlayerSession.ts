@@ -1,24 +1,15 @@
 import { useShakaPlayer } from './useShakaPlayer';
 import { useSourcePlayer } from './useSourcePlayer';
-import { useCurrentVideoTrack } from './useCurrentVideoTrack';
 import { useAudioTrackSelection } from './useAudioTrackSelection';
-import { useAutoplayNextEpisode } from './useAutoplayNextEpisode';
-import { usePlayerControlKeys } from './usePlayerControlKeys';
 
 type UsePlayerSessionProps = {
-  video?: HTMLVideoElement;
-  playerContainer?: HTMLElement;
-  sourceURI: string;
+  video: HTMLVideoElement | undefined;
 };
 
 /**
  * Composes the player hooks into a single playback session
  */
-export function usePlayerSession({
-  video,
-  playerContainer,
-  sourceURI,
-}: UsePlayerSessionProps) {
+export function usePlayerSession({ video }: UsePlayerSessionProps) {
   const { player, playerQueue } = useShakaPlayer({ video });
 
   const {
@@ -26,17 +17,14 @@ export function usePlayerSession({
     files,
     selectedFileIndex,
     selectFile,
-    prepareAndPlay,
-    navigateFiles,
+    playFromURL,
     isLoading,
+    navigateFiles,
   } = useSourcePlayer({
     player,
     playerQueue,
-    sourceURI,
     multiple: true,
   });
-
-  const videoTrack = useCurrentVideoTrack({ player });
 
   const {
     audioTracks,
@@ -47,29 +35,18 @@ export function usePlayerSession({
     player,
   });
 
-  useAutoplayNextEpisode({
-    video,
-    files,
-    navigateFiles,
-  });
-  usePlayerControlKeys({
-    video,
-    frameRate: videoTrack?.frameRate ?? 0,
-    playerContainer,
-    navigateFiles,
-    navigateAudioTracks,
-  });
-
   return {
     activeURI,
     files,
     selectedFileIndex,
-    selectFile,
-    prepareAndPlay,
     audioTracks,
     selectedAudioTrackIndex,
     selectAudioTrack,
     player,
     isLoading,
+    navigateFiles,
+    navigateAudioTracks,
+    selectFile,
+    playFromURL,
   };
 }

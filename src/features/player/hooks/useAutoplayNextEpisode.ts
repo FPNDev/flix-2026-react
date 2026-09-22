@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import type { MediaFile } from '@/types/media';
 
 type UseAutoplayNextEpisodeProps = {
-  video?: HTMLVideoElement;
+  video: HTMLVideoElement | undefined;
   files: MediaFile[];
   navigateFiles: (direction: 1 | -1) => void;
 };

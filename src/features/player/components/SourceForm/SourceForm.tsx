@@ -1,35 +1,65 @@
 import clsx from 'clsx';
 import classes from './SourceForm.module.scss';
 import { Icon } from '@/components/DesignSystem/Icon';
+import { useToast } from '@/components/DesignSystem/Toast';
+import { usePlayerActions, usePlayerState } from '../../context/PlayerContext';
+import { isShakaActive } from '../../utils/shaka';
+import { useRef } from 'react';
+import { TrackSelectors } from '../TrackSelectors';
 
-type Props = React.PropsWithChildren<{
-  sourceURI: string;
-  onSourceURIChange: (sourceURI: string) => void;
-  onSubmit: (ev: React.SubmitEvent) => void;
-}>;
+export function SourceForm() {
+  const { addToast } = useToast();
+  const { playFromURL, focusPlayer } = usePlayerActions();
+  const { activeURI, player, isLoading, files, selectedFileIndex } =
+    usePlayerState();
 
-export function SourceForm({
-  sourceURI,
-  onSourceURIChange,
-  onSubmit,
-  children,
-}: Props) {
+  const sourceInputRef = useRef<HTMLInputElement>(null);
+
+  const submitForm = (ev: React.SubmitEvent) => {
+    ev.preventDefault();
+
+    const sourceInput = sourceInputRef.current;
+    if (!sourceInput) {
+      return;
+    }
+
+    focusPlayer();
+
+    const sourceURI = sourceInput.value;
+
+    if (
+      activeURI === sourceURI &&
+      ((player && isShakaActive(player)) || isLoading)
+    ) {
+      const fileName = files.length ? files[selectedFileIndex].name : sourceURI;
+      addToast({
+        icon: 'playlist_remove',
+        text: `Already playing ` + fileName,
+        variant: 'danger',
+      });
+      return;
+    }
+
+    playFromURL(sourceURI);
+  };
+
   return (
     <form
       className={clsx(classes.controlForm, 't-body-lg')}
-      onSubmit={onSubmit}
+      onSubmit={submitForm}
     >
       <input
         name="sourceURI"
-        value={sourceURI}
         placeholder="Source URI"
-        onChange={(ev) => onSourceURIChange(ev.target.value)}
         autoFocus
+        ref={sourceInputRef}
       />
-      {children}
+      <TrackSelectors />
       <button className="btn btn--lg btn--primary">
         <Icon as="span" icon="play_arrow" size="xl" variant="fill" />
       </button>
     </form>
   );
 }
+
+export default SourceForm;
