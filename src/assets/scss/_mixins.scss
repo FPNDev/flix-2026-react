@@ -72,13 +72,13 @@
   }
 }
 
-@mixin fromDir($name) {
-  @media (min-inline-size: map.get($breakpoints, $name)) {
+@mixin fromInline($name) {
+  @container (min-inline-size: #{map.get($breakpoints, $name)}) {
     @content;
   }
 }
-@mixin untilDir($name) {
-  @media (max-inline-size: map.get($breakpoints, $name)) {
+@mixin untilInline($name) {
+  @container (max-inline-size: #{map.get($breakpoints, $name)}) {
     @content;
   }
 }

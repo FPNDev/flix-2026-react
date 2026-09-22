@@ -11,8 +11,9 @@
   gap: var(--sp-2);
   pointer-events: none;
 
-  @include untilDir('mobile') {
+  @include untilInline('mobile') {
+    align-items: center;
     inset-inline: var(--sp-3);
-    inset-block-end: calc(var(--tabbar-height) + var(--sp-3));
+    inset-block-end: calc(var(--toast-block-offset, 0px) + var(--sp-3));
   }
 }

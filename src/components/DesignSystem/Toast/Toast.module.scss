@@ -4,8 +4,8 @@
   display: flex;
   align-items: center;
   gap: var(--sp-3);
-  inline-size: 25rem;
-  max-inline-size: 100%;
+  min-inline-size: 17.5rem;
+  max-inline-size: min(100%, 26.25rem);
   padding: var(--sp-3) var(--sp-4);
   border: var(--bw-hair) solid var(--border-default);
   border-radius: var(--radius-lg);
