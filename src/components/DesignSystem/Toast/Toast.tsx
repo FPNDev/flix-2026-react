@@ -45,8 +45,8 @@ export function Toast({ toast }: Props) {
           ? () => removeToast(toast)
           : undefined
       }
-      onMouseOver={() => clearRemovalTimeout(toast)}
-      onMouseLeave={() => startRemovalTimeout(toast)}
+      onPointerEnter={() => clearRemovalTimeout(toast)}
+      onPointerLeave={() => startRemovalTimeout(toast)}
     >
       <Icon className={clsx(classes.icon, 'icon')} icon={toast.icon} />
       <div className={clsx(classes.text)} role="status" aria-atomic>
