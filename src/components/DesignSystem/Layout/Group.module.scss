@@ -20,7 +20,7 @@ $spacing-steps: (
 
   &.equal > * {
     flex: 1 auto;
-    width: 0;
+    inline-size: 0;
   }
 
   &.stack {
