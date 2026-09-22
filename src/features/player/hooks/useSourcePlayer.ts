@@ -40,11 +40,9 @@ export function useSourcePlayer({
       }
 
       const networkError = parseShakaNetworkError(err);
-      if (!networkError || !isRemuxerError(networkError.data)) {
-        return;
+      if (networkError && isRemuxerError(networkError.data)) {
+        errorText = networkError.data.error;
       }
-
-      errorText = networkError.data.error;
     }
 
     addToast({
@@ -52,6 +50,7 @@ export function useSourcePlayer({
       text: errorText,
       variant: 'danger',
     });
+    setIsLoading(false);
   };
 
   const onLoad = () => {
