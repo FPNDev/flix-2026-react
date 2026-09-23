@@ -2,10 +2,27 @@ import react, { reactCompilerPreset } from '@vitejs/plugin-react';
 import babel from '@rolldown/plugin-babel';
 import { defineConfig } from 'vite';
 import path from 'path';
+import { VitePWA } from 'vite-plugin-pwa';
+import { PWAConfig } from './pwa.config.ts';
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), babel({ presets: [reactCompilerPreset()] })],
+  plugins: [
+    react(),
+    babel({ presets: [reactCompilerPreset()] }),
+    VitePWA({
+      registerType: 'autoUpdate',
+      pwaAssets: {
+        config: true,
+      },
+      devOptions: {
+        enabled: true,
+      },
+      manifest: {
+        ...PWAConfig,
+      },
+    }),
+  ],
   resolve: {
     alias: {
       '@': path.resolve(import.meta.dirname, 'src'),
@@ -15,6 +32,7 @@ export default defineConfig({
       ),
     },
   },
+
   server: {
     host: process.env.NODE_ENV !== 'development' ? true : false,
   },
@@ -33,23 +51,23 @@ export default defineConfig({
             {
               name: 'react-vendor',
               test: /node_modules[\\/]react/,
-              priority: 20,
+              priority: 3,
             },
             {
               name: 'shaka-vendor',
               test: /shaka-player\.stripped/,
-              priority: 15,
+              priority: 2,
             },
             {
               name: 'vendor',
               test: /node_modules/,
-              priority: 10,
+              priority: 1,
             },
             {
               name: 'common',
               minShareCount: 2,
               minSize: 10000,
-              priority: 5,
+              priority: 0,
             },
           ],
         },
