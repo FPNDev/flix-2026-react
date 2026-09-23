@@ -11,6 +11,8 @@ Solved:
 
 Next steps:
 
+- [x] Split magnet logic from player -
+      it shall be pure HLS, form handles Magnet
 - [ ] Migrate src/assets/scss/components to SCSS modules
 - [ ] Implement Player UI:
   - [ ] Base UI (play/pause, volume, fullscreen, title)

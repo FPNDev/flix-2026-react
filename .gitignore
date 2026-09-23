@@ -9,6 +9,7 @@ lerna-debug.log*
 
 node_modules
 dist
+dev-dist
 dist-ssr
 *.local
 
@@ -27,4 +28,4 @@ dist-ssr
 .claude
 CLAUDE.md
 .pre-commit-config.yaml
-scripts
+pre-commit
