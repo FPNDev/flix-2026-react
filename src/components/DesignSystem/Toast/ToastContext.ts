@@ -14,7 +14,6 @@ type ToastDispatch = {
 };
 
 export const ToastDispatchContext = createContext<ToastDispatch | null>(null);
-
 export const ToastStatesContext = createContext<ToastState[]>([]);
 
 export const useToast = () =>

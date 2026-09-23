@@ -72,6 +72,20 @@
   }
 }
 
+@mixin fromVMin($name) {
+  $value: map.get($breakpoints, $name);
+  @media (min-width: $value), (min-height: $value) {
+    @content;
+  }
+}
+
+@mixin untilVMin($name) {
+  $value: map.get($breakpoints, $name);
+  @media (max-width: $value), (max-height: $value) {
+    @content;
+  }
+}
+
 @mixin fromInline($name) {
   @container (min-inline-size: #{map.get($breakpoints, $name)}) {
     @content;

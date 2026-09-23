@@ -5,7 +5,7 @@ export type PlayerState = {
   activeURI: string;
   files: MediaFile[];
   selectedFileIndex: number;
-  audioTracks: WithKey<shaka.extern.AudioTrack>[];
+  audioTracks: shaka.extern.AudioTrack[];
   selectedAudioTrackIndex: number;
   isLoading: boolean;
   video: HTMLVideoElement | undefined;
@@ -17,7 +17,7 @@ export type PlayerActions = {
   setVideo: (video?: HTMLVideoElement) => void;
   setPlayerContainer: (playerContainer?: HTMLElement) => void;
   selectFile: (fileIndex: number) => void;
-  selectAudioTrack: (audioTrackIndex: number) => void;
+  selectAudioTrack: (audioTrackIndex: number, showToast?: boolean) => void;
   playFromURL: (magnetURL: string) => void;
   navigateFiles: (direction: -1 | 1) => void;
   navigateAudioTracks: (direction: -1 | 1) => void;

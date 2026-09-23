@@ -20,15 +20,10 @@ export function Toast({ toast }: Props) {
   const isRemoving = toast.status === ToastStatus.Removing;
 
   useEffect(() => {
-    const onWindowBlur = () => {
-      startRemovalTimeout(toast);
-    };
-
+    const onWindowBlur = () => startRemovalTimeout(toast);
     window.addEventListener('blur', onWindowBlur);
 
-    return () => {
-      window.removeEventListener('blur', onWindowBlur);
-    };
+    return () => window.removeEventListener('blur', onWindowBlur);
   }, [toast, startRemovalTimeout]);
 
   return (
