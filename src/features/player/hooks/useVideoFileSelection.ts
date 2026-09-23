@@ -1,75 +1,20 @@
-import { useToast } from '@/components/DesignSystem/Toast';
-import type { FilesResponse, MediaFile } from '@/types/media';
-import { isAbortError, renewAbortController } from '@/utils/abort';
-import { useRef, useState } from 'react';
-import { fetchMediaFiles } from '../api/playerApi';
+import { useState } from 'react';
+import type { MediaFile } from '../types/mediaFiles.types';
 
 /**
  * Implements listing of media files within magnet link
  */
 export function useVideoFileSelection() {
-  const { addToast } = useToast();
-
   const [files, setFiles] = useState<MediaFile[]>([]);
   const [selectedFileIndex, setSelectedFileIndex] = useState<number>(0);
 
-  const abortRef = useRef<AbortController>(null);
-
-  const fetchFiles = async (magnetURI: string) => {
-    setFiles([]);
-    setSelectedFileIndex(0);
-
-    if (!magnetURI) {
-      return [];
-    }
-
-    try {
-      const data = await fetchMediaFiles<FilesResponse>(
-        magnetURI,
-        renewAbortController(abortRef).signal,
-      );
-      const playableFiles = data.files.filter((file) => file.playable);
-
-      setFiles(playableFiles);
-
-      if (!playableFiles.length) {
-        addToast({
-          icon: 'play_disabled',
-          text: `URI specified has no playable files`,
-          variant: 'danger',
-        });
-      }
-
-      return playableFiles;
-    } catch (err) {
-      if (!isAbortError(err)) {
-        addToast({
-          icon: 'playlist_remove',
-          text: `Failed to fetch file list for specified URI`,
-          variant: 'danger',
-        });
-        console.error(err);
-      }
-
-      return [];
-    }
-  };
-
-  const selectFile = (index: number, fileList: MediaFile[] = files) => {
-    const file = fileList[index];
+  const selectFile = (index: number) => {
+    const file = files[index];
     if (!file) {
       return;
     }
 
     setSelectedFileIndex(index);
-
-    addToast({
-      icon: 'playlist_play',
-      text: 'Playing ' + file.name,
-      variant: 'success',
-    });
-
-    return file;
   };
 
   const navigateFiles = (direction: -1 | 1) => {
@@ -85,7 +30,12 @@ export function useVideoFileSelection() {
       return;
     }
 
-    return selectFile(nextIndex);
+    selectFile(nextIndex);
+  };
+
+  const setFilesAndResetIndex = (files: MediaFile[]) => {
+    setFiles(files);
+    setSelectedFileIndex(0);
   };
 
   return {
@@ -93,6 +43,6 @@ export function useVideoFileSelection() {
     selectedFileIndex,
     selectFile,
     navigateFiles,
-    fetchFiles,
+    setFiles: setFilesAndResetIndex,
   };
 }

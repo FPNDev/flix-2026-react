@@ -1,61 +1,99 @@
 import { useShakaPlayer } from './useShakaPlayer';
-import { useMagnetPlayer } from './useMagnetPlayer';
-import { useAudioTrackSelection } from './useAudioTrackSelection';
-import { useNextTrackPicker } from './useBestTrackPicker';
+import { useTrackSelection } from './useTrackSelection';
+import { useNextTrackPicker } from './useNextTrackPicker';
 
-type UsePlayerSessionProps = {
+type Props = {
   video: HTMLVideoElement | undefined;
 };
 
 /**
  * Composes the player hooks into a single playback session
  */
-export function usePlayerSession({ video }: UsePlayerSessionProps) {
-  const { player, playerQueue } = useShakaPlayer({ video });
+export function usePlayerSession({ video }: Props) {
+  const { player, activeURI, playFromURL, isLoading } = useShakaPlayer({
+    video,
+  });
+
+  const assetId = activeURI
+    ? (new URL(activeURI).searchParams.get('magnet') ?? '')
+    : '';
 
   const {
-    activeURI,
-    files,
-    selectedFileIndex,
-    selectFile,
-    playFromURL,
-    isLoading,
-    navigateFiles,
-  } = useMagnetPlayer({
+    tracks: videoTracks,
+    selectedTrackIndex: selectedVideoTrackIndex,
+    selectTrack: selectVideoTrack,
+  } = useTrackSelection({
     player,
-    playerQueue,
-    multiple: true,
+    trackType: 'VideoTrack',
   });
 
   const {
-    audioTracks,
-    selectedAudioTrackIndex,
-    selectAudioTrack,
-    navigateAudioTracks,
-  } = useAudioTrackSelection({
+    tracks: audioTracks,
+    selectedTrackIndex: selectedAudioTrackIndex,
+    selectTrack: selectAudioTrack,
+    navigateTracks: navigateAudioTracks,
+  } = useTrackSelection({
     player,
+    trackType: 'AudioTrack',
+    bufferDuration: 1,
+  });
+
+  const {
+    tracks: textTracks,
+    selectedTrackIndex: selectedTextTrackIndex,
+    selectTrack: selectTextTrack,
+    navigateTracks: navigateTextTracks,
+    disableTrack: disableTextTrack,
+  } = useTrackSelection({
+    player,
+    trackType: 'TextTrack',
   });
 
   useNextTrackPicker({
-    audioTracks,
-    magnetURI: activeURI,
+    trackType: 'VideoTrack',
+    tracks: videoTracks,
+    assetId,
     player,
-    selectedAudioTrackIndex,
-    selectAudioTrack,
+    selectedTrackIndex: selectedVideoTrackIndex,
+    selectTrack: selectVideoTrack,
+    defaultIndex: 0,
+  });
+
+  useNextTrackPicker({
+    trackType: 'AudioTrack',
+    tracks: audioTracks,
+    assetId,
+    player,
+    selectedTrackIndex: selectedAudioTrackIndex,
+    selectTrack: selectAudioTrack,
+    defaultIndex: 0,
+  });
+
+  useNextTrackPicker({
+    trackType: 'TextTrack',
+    tracks: textTracks,
+    assetId,
+    player,
+    selectedTrackIndex: selectedTextTrackIndex,
+    selectTrack: selectTextTrack,
+    defaultIndex: undefined,
   });
 
   return {
-    activeURI,
-    files,
-    selectedFileIndex,
-    audioTracks,
-    selectedAudioTrackIndex,
-    selectAudioTrack,
     player,
     isLoading,
-    navigateFiles,
+    activeURI,
+    videoTracks,
+    audioTracks,
+    textTracks,
+    selectedVideoTrackIndex,
+    selectedAudioTrackIndex,
+    selectedTextTrackIndex,
+    selectAudioTrack,
+    selectTextTrack,
     navigateAudioTracks,
-    selectFile,
+    navigateTextTracks,
+    disableTextTrack,
     playFromURL,
   };
 }

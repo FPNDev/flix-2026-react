@@ -2,12 +2,17 @@ import { GiB } from '@/constants/filesize';
 import { Row } from '@/components/DesignSystem/Layout';
 import { usePlayerActions, usePlayerState } from '../context/PlayerContext';
 import { addKeys } from '@/utils/list';
+import {
+  useMediaFileActions,
+  useMediaFiles,
+} from '../context/MediaFilesContext';
 
 export function TrackSelectors() {
-  const { files, selectedFileIndex, audioTracks, selectedAudioTrackIndex } =
-    usePlayerState();
+  const { audioTracks, selectedAudioTrackIndex } = usePlayerState();
+  const { selectAudioTrack, focusPlayer } = usePlayerActions();
 
-  const { selectAudioTrack, selectFile, focusPlayer } = usePlayerActions();
+  const { files, selectedFileIndex } = useMediaFiles();
+  const { selectFile } = useMediaFileActions();
 
   const onAudioTrackIndexChanged = (
     ev: React.ChangeEvent<HTMLSelectElement>,

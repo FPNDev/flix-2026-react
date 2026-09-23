@@ -1,5 +1,5 @@
 export type Queue = {
-  add: (item: () => Promise<unknown>) => void;
+  add: (item: () => Promise<unknown>) => Promise<unknown>;
   onIdle: (callback: () => void) => void;
 };
 /**
@@ -8,7 +8,11 @@ export type Queue = {
  * @returns Queue manager
  */
 export function queue(): Queue {
-  const items: (() => unknown)[] = [];
+  const items: [
+    () => unknown,
+    (value: unknown) => void,
+    (err: unknown) => void,
+  ][] = [];
   const callbacks: (() => void)[] = [];
 
   let working = false;
@@ -26,18 +30,39 @@ export function queue(): Queue {
     }
 
     working = true;
-    const item = items.shift()!;
-    Promise.resolve(item()).finally(() => {
-      processQueue();
-    });
+
+    const [item, resolveItem, rejectItem] = items.shift()!;
+    let res;
+    try {
+      res = item();
+      if (res instanceof Promise) {
+        res.then(resolveItem, rejectItem).finally(() => {
+          processQueue();
+        });
+      } else {
+        resolveItem(res);
+        processQueue();
+      }
+    } catch (err) {
+      rejectItem(err);
+    }
   }
 
   return {
-    add: (item) => {
-      items.push(item);
+    add: <T>(item: () => Promise<T>) => {
+      let resolveItem: ((val: T) => void) | undefined = undefined;
+      let rejectItem: ((err: unknown) => void) | undefined = undefined;
+      const promise = new Promise<T>((resolve, reject) => {
+        resolveItem = resolve;
+        rejectItem = reject;
+      });
+
+      items.push([item, resolveItem! as (v: unknown) => void, rejectItem!]);
       if (!working) {
         processQueue();
       }
+
+      return promise;
     },
     onIdle: (callback) => {
       if (working) {

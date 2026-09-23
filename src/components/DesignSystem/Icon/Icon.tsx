@@ -1,4 +1,4 @@
-import type { PropsWithAs } from '@/types/utils';
+import type { PropsWithAs } from '@/types/utils.types';
 import classes from './Icon.module.scss';
 import clsx from 'clsx';
 import type { IconType } from './Icon.types';

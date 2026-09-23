@@ -1,4 +1,4 @@
-import type { PropsWithAs } from '@/types/utils';
+import type { PropsWithAs } from '@/types/utils.types';
 import clsx from 'clsx';
 import classes from './Container.module.scss';
 
