@@ -3,12 +3,12 @@ import { useFullscreenFocusGuard } from '@/hooks/useFullscreenFocusGuard';
 import { usePlayerControlKeys } from '../../hooks/usePlayerControlKeys';
 import { useAutoplayNextEpisode } from '../../hooks/useAutoplayNextEpisode';
 import { usePlayerActions, usePlayerState } from '../../context/PlayerContext';
-import { useCurrentVideoTrack } from '../../hooks/useCurrentVideoTrack';
+import { useMediaFileActions } from '../../context/MediaFilesContext';
 
 export function Player() {
-  const { video, playerContainer, player, files } = usePlayerState();
-  const { setVideo, setPlayerContainer, navigateFiles, navigateAudioTracks } =
-    usePlayerActions();
+  const { video } = usePlayerState();
+  const { setVideo, setPlayerContainer } = usePlayerActions();
+  const { navigateFiles } = useMediaFileActions();
 
   const onVideoRef = (newVideo: HTMLVideoElement | null) => {
     setVideo(newVideo ?? undefined);
@@ -17,20 +17,11 @@ export function Player() {
     setPlayerContainer(newPlayerContainer ?? undefined);
   };
 
-  const videoTrack = useCurrentVideoTrack({ player });
-
   useAutoplayNextEpisode({
     video,
-    files,
     navigateFiles,
   });
-  usePlayerControlKeys({
-    video,
-    frameRate: videoTrack?.frameRate ?? 0,
-    playerContainer,
-    navigateFiles,
-    navigateAudioTracks,
-  });
+  usePlayerControlKeys();
   useFullscreenFocusGuard();
 
   return (
@@ -39,7 +30,7 @@ export function Player() {
       ref={onPlayerContainerRef}
       tabIndex={-1}
     >
-      <video className={classes.video} ref={onVideoRef} controls />
+      <video className={classes.video} ref={onVideoRef} controls playsInline />
     </div>
   );
 }

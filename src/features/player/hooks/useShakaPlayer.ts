@@ -1,11 +1,18 @@
 import { queue, type Queue } from '@/utils/queue';
 import { createStore } from '@/utils/store';
-import { useLayoutEffect, useState, useSyncExternalStore } from 'react';
+import {
+  useEffectEvent,
+  useLayoutEffect,
+  useState,
+  useSyncExternalStore,
+} from 'react';
 import shaka from 'shaka-player';
 import { useToast } from '@/components/DesignSystem/Toast';
 import { SHAKA_CONFIG } from '../config/shaka';
+import { loadURL } from '../utils/shaka';
+import { isRemuxerError } from '../utils/httpErrors';
 
-type UseShakaPlayerProps = {
+type Props = {
   video: HTMLVideoElement | undefined;
 };
 
@@ -20,21 +27,28 @@ shaka.polyfill.installAll();
  * Manages Shaka Player under given video element as a hook
  * Detach/attach & destroy implemented
  */
-export function useShakaPlayer({ video }: UseShakaPlayerProps) {
+export function useShakaPlayer({ video }: Props) {
   const { addToast } = useToast();
 
   const [store] = useState(() => createStore<PlayerInstance>(null));
   const { player, playerQueue } =
     useSyncExternalStore(store.subscribe, store.getSnapshot) ?? {};
 
+  const [activeURI, setActiveURI] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  const notifyUnsupportedBrowser = useEffectEvent(() => {
+    addToast({
+      icon: 'play_disabled',
+      text: 'Browser does not support playback',
+      variant: 'danger',
+    });
+  });
+
   // Create a new Shaka Player instance and configure it when the component mounts
   useLayoutEffect(() => {
     if (!shaka.Player.isBrowserSupported()) {
-      addToast({
-        icon: 'play_disabled',
-        text: 'Browser does not support playback',
-        variant: 'danger',
-      });
+      notifyUnsupportedBrowser();
       return;
     }
 
@@ -52,7 +66,7 @@ export function useShakaPlayer({ video }: UseShakaPlayerProps) {
       store.set(null);
       newPlayerQueue.add(() => newPlayer.destroy());
     };
-  }, [addToast, store]);
+  }, [store]);
 
   // Attach the Shaka Player to the video element when it changes
   useLayoutEffect(() => {
@@ -67,5 +81,39 @@ export function useShakaPlayer({ video }: UseShakaPlayerProps) {
     };
   }, [video, player, playerQueue]);
 
-  return { player, playerQueue };
+  const playFromURL = async (url: string) => {
+    if (!player || !video) {
+      return false;
+    }
+
+    setActiveURI(url);
+    if (!url) {
+      player.unload();
+      return false;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const loaded = await loadURL(player, url);
+      if (loaded) {
+        video.play();
+        setIsLoading(false);
+      }
+
+      return loaded;
+    } catch (err) {
+      setIsLoading(false);
+
+      addToast({
+        icon: 'play_disabled',
+        text: isRemuxerError(err) ? err.error : 'Failed loading specified link',
+        variant: 'danger',
+      });
+    }
+
+    return false;
+  };
+
+  return { player, activeURI, isLoading, playFromURL };
 }

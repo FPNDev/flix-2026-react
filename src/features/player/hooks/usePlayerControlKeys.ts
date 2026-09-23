@@ -1,68 +1,43 @@
-import { useToast } from '@/components/DesignSystem/Toast';
 import { PLAYER_CONTROL_KEYS } from '@/features/player/constants/playerControlKeys';
 import { addExclusiveKeyUpListener } from '@/utils/keyboard';
-import { useEffect } from 'react';
-
-type UsePlayerHotkeysProps = {
-  video: HTMLVideoElement | undefined;
-  playerContainer: HTMLElement | undefined;
-  frameRate: number;
-  navigateFiles: (direction: 1 | -1) => void;
-  navigateAudioTracks: (direction: 1 | -1) => void;
-};
-
+import { useEffect, useEffectEvent } from 'react';
+import { usePlayerActions, usePlayerState } from '../context/PlayerContext';
+import { useMediaFileActions } from '../context/MediaFilesContext';
 /**
  * Binds hotkeys to different player controls
  */
-export function usePlayerControlKeys({
-  video,
-  frameRate,
-  playerContainer,
-  navigateFiles,
-  navigateAudioTracks,
-}: UsePlayerHotkeysProps) {
-  const { addToast } = useToast();
+export function usePlayerControlKeys() {
+  const state = usePlayerState();
+  const actions = usePlayerActions();
+  const fileActions = useMediaFileActions();
+
+  const { video, playerContainer } = state;
+
+  const onKeyUp = useEffectEvent((ev: KeyboardEvent) => {
+    const { code } = ev;
+
+    // Generic video controls - volume, fullscreen etc - state agnostic
+    if (code in PLAYER_CONTROL_KEYS) {
+      ev.preventDefault();
+      return PLAYER_CONTROL_KEYS[code]({
+        state: state as typeof state & {
+          video: NonNullable<typeof state.video>;
+          playerContainer: NonNullable<typeof state.playerContainer>;
+        },
+        actions,
+        fileActions,
+        frameRate:
+          state.videoTracks[state.selectedVideoTrackIndex]?.frameRate ?? 0,
+        event: ev,
+      });
+    }
+  });
 
   useEffect(() => {
     if (!video || !playerContainer) {
       return;
     }
 
-    return addExclusiveKeyUpListener(playerContainer, (ev) => {
-      const { shiftKey, code } = ev;
-
-      // Generic video controls - volume, fullscreen etc - state agnostic
-      if (code in PLAYER_CONTROL_KEYS) {
-        ev.preventDefault();
-        return PLAYER_CONTROL_KEYS[code]({
-          video,
-          frameRate,
-          playerContainer,
-          event: ev,
-          addToast,
-        });
-      }
-
-      if (code === 'KeyA') {
-        ev.preventDefault();
-        navigateAudioTracks(shiftKey ? -1 : 1);
-        return;
-      }
-
-      if (shiftKey) {
-        if (code === 'KeyP' || code === 'KeyN') {
-          ev.preventDefault();
-          navigateFiles(code === 'KeyP' ? -1 : 1);
-          return;
-        }
-      }
-    });
-  }, [
-    video,
-    playerContainer,
-    frameRate,
-    navigateFiles,
-    navigateAudioTracks,
-    addToast,
-  ]);
+    return addExclusiveKeyUpListener(playerContainer, onKeyUp);
+  }, [video, playerContainer]);
 }

@@ -1,9 +1,14 @@
 import { useEffectWithPrevious } from '@/hooks/useEffectWithPrevious';
 import { createStore } from '@/utils/store';
-import { useEffect, useState, useSyncExternalStore } from 'react';
+import {
+  useEffect,
+  useEffectEvent,
+  useState,
+  useSyncExternalStore,
+} from 'react';
 import type shaka from 'shaka-player';
 
-type UsePlayerSubscriptionProps<T> = {
+type Props<T> = {
   player: shaka.Player | undefined;
   events: string[];
   selector: (player: shaka.Player, evt?: Event) => T;
@@ -18,12 +23,8 @@ export function usePlayerSubscription<T>({
   events,
   selector,
   fallback,
-}: UsePlayerSubscriptionProps<T>) {
+}: Props<T>) {
   const [store] = useState(() => createStore<T>(fallback));
-
-  const refresh = () => {
-    store.set(player ? selector(player) : fallback);
-  };
 
   useEffectWithPrevious(
     ([oldPlayer]) => {
@@ -34,27 +35,30 @@ export function usePlayerSubscription<T>({
     [player],
   );
 
+  const setValueOnEvent = useEffectEvent((evt: Event) => {
+    if (!player) {
+      return;
+    }
+    store.set(selector(player, evt));
+  });
+
   useEffect(() => {
     if (!player) {
       return;
     }
 
-    const onPlayerEvent = (evt: Event) => {
-      store.set(selector(player, evt));
-    };
-
     for (const eventName of events) {
-      player.addEventListener(eventName, onPlayerEvent);
+      player.addEventListener(eventName, setValueOnEvent);
     }
 
     return () => {
       for (const eventName of events) {
-        player.removeEventListener(eventName, onPlayerEvent);
+        player.removeEventListener(eventName, setValueOnEvent);
       }
     };
-  }, [player, events, selector, store]);
+  }, [player, events]);
 
   const snapshot = useSyncExternalStore(store.subscribe, store.getSnapshot);
 
-  return { snapshot, refresh };
+  return { snapshot };
 }

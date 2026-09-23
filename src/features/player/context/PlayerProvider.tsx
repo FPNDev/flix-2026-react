@@ -7,18 +7,21 @@ export function PlayerProvider({ children }: PropsWithChildren) {
   const [playerContainer, setPlayerContainer] = useState<HTMLElement>();
 
   const {
-    activeURI,
-    files,
-    selectedFileIndex,
-    selectFile,
-    playFromURL,
-    audioTracks,
-    selectedAudioTrackIndex,
-    selectAudioTrack,
     player,
     isLoading,
+    activeURI,
+    videoTracks,
+    audioTracks,
+    textTracks,
+    selectedVideoTrackIndex,
+    selectedAudioTrackIndex,
+    selectedTextTrackIndex,
+    selectAudioTrack,
+    selectTextTrack,
     navigateAudioTracks,
-    navigateFiles,
+    navigateTextTracks,
+    disableTextTrack,
+    playFromURL,
   } = usePlayerSession({ video });
 
   const focusPlayer = () => {
@@ -32,27 +35,30 @@ export function PlayerProvider({ children }: PropsWithChildren) {
   return (
     <PlayerActionsContext
       value={{
-        setVideo,
         setPlayerContainer,
-        selectFile,
-        selectAudioTrack,
-        playFromURL,
+        setVideo,
         focusPlayer,
+        selectAudioTrack,
+        selectTextTrack,
         navigateAudioTracks,
-        navigateFiles,
+        navigateTextTracks,
+        disableTextTrack,
+        playFromURL,
       }}
     >
       <PlayerStateContext
         value={{
-          activeURI,
-          files,
-          selectedFileIndex,
-          selectedAudioTrackIndex,
-          audioTracks,
           video,
-          player,
           playerContainer,
+          player,
           isLoading,
+          activeURI,
+          videoTracks,
+          audioTracks,
+          textTracks,
+          selectedVideoTrackIndex,
+          selectedAudioTrackIndex,
+          selectedTextTrackIndex,
         }}
       >
         {children}

@@ -1,14 +1,18 @@
-import { type ToastInfo } from '@/components/DesignSystem/Toast';
 import { toggleFullscreen } from '@/utils/fullscreen';
 import { seekFrameByFrame } from '../utils/seeking';
 import { SEEK_STEP } from '../config/controls';
+import type { PlayerActions, PlayerState } from '../types/player.types';
+import type { MediaFileActions } from '../types/mediaFiles.types';
 
 type ActionParams = {
-  video: HTMLVideoElement;
-  frameRate: number;
-  playerContainer: HTMLElement;
   event: KeyboardEvent;
-  addToast: (toast: ToastInfo) => void;
+  state: PlayerState & {
+    playerContainer: NonNullable<PlayerState['playerContainer']>;
+    video: NonNullable<PlayerState['video']>;
+  };
+  actions: PlayerActions;
+  fileActions: MediaFileActions;
+  frameRate: number;
 };
 
 type KeyActions = Record<string, (params: ActionParams) => boolean | void>;
@@ -17,76 +21,46 @@ type KeyActions = Record<string, (params: ActionParams) => boolean | void>;
  * Video player general stateless hotkeys (advanced stateful ones are part of usePlayerControlKeys directly)
  */
 export const PLAYER_CONTROL_KEYS: KeyActions = {
-  KeyF: ({ playerContainer }) => toggleFullscreen(playerContainer),
-  Enter: ({ playerContainer }) => toggleFullscreen(playerContainer),
-  KeyC: ({ video, event: { shiftKey, altKey }, addToast }) => {
-    if (!video.textTracks.length) {
+  KeyF: ({ state: { playerContainer } }) => toggleFullscreen(playerContainer),
+  Enter: ({ state: { playerContainer } }) => toggleFullscreen(playerContainer),
+  KeyC: ({ state, actions, event: { shiftKey, altKey } }) => {
+    if (!state.textTracks.length) {
       return;
     }
 
-    const addSubtitlesToast = (track: TextTrack) => {
-      addToast({
-        icon: 'subtitles',
-        text: `Changed subtitles to ${track.label} - ${track.language}`,
-      });
-    };
-
-    const currentTrackIndex = Array.from(video.textTracks).findIndex(
-      (track) => track.mode === 'showing',
-    );
-    const subtitlesEnabled = currentTrackIndex !== -1;
-
-    if (!shiftKey && !subtitlesEnabled) {
-      video.textTracks[0].mode = 'showing';
-      addSubtitlesToast(video.textTracks[0]);
-      return;
+    if (!shiftKey) {
+      return state.selectedTextTrackIndex !== undefined
+        ? actions.disableTextTrack(true)
+        : actions.selectTextTrack(0, true);
     }
 
-    if (subtitlesEnabled) {
-      video.textTracks[currentTrackIndex].mode = 'hidden';
-    }
-
-    const goBackwards = altKey;
-
-    if (shiftKey) {
-      const tracksCount = video.textTracks.length;
-      const nextIndex =
-        !subtitlesEnabled && goBackwards
-          ? tracksCount - 1
-          : currentTrackIndex + (goBackwards ? -1 : 1);
-
-      if (
-        !subtitlesEnabled ||
-        (nextIndex !== -1 && nextIndex !== video.textTracks.length)
-      ) {
-        const realIndex = (tracksCount + nextIndex) % tracksCount;
-        video.textTracks[realIndex].mode = 'showing';
-
-        addSubtitlesToast(video.textTracks[realIndex]);
-
-        return;
-      }
-    }
-
-    addToast({
-      icon: 'subtitles',
-      text: 'Subtitles have been disabled',
-      variant: 'danger',
-    });
+    return actions.navigateTextTracks(altKey ? -1 : 1);
   },
-  KeyM: ({ video, addToast }) => {
+  KeyA: ({ actions, event: { shiftKey } }) => {
+    actions.navigateAudioTracks(shiftKey ? -1 : 1);
+  },
+  KeyN: ({ fileActions, event: { shiftKey } }) => {
+    if (!shiftKey) {
+      return;
+    }
+
+    fileActions.navigateFiles(1);
+  },
+  KeyP: ({ fileActions, event: { shiftKey } }) => {
+    if (!shiftKey) {
+      return;
+    }
+
+    fileActions.navigateFiles(-1);
+  },
+  KeyM: ({ state: { video } }) => {
     if (video.muted) {
       video.muted = false;
     } else {
       video.muted = true;
     }
-
-    addToast({
-      icon: video.muted ? 'volume_mute' : 'volume_up',
-      text: video.muted ? 'Video muted' : 'Video unmuted',
-    });
   },
-  Space: ({ event, video }) => {
+  Space: ({ event, state: { video } }) => {
     if (event.target === video) {
       return;
     }
@@ -101,22 +75,22 @@ export const PLAYER_CONTROL_KEYS: KeyActions = {
       video.pause();
     }
   },
-  ArrowLeft: ({ video, event }) => {
+  ArrowLeft: ({ state: { video }, event }) => {
     if (event.target === video) {
       return;
     }
     video.currentTime -= SEEK_STEP;
   },
-  ArrowRight: ({ video, event }) => {
+  ArrowRight: ({ state: { video }, event }) => {
     if (event.target === video) {
       return;
     }
     video.currentTime += SEEK_STEP;
   },
-  Comma: ({ video, frameRate }) => {
+  Comma: ({ state: { video }, frameRate }) => {
     seekFrameByFrame({ video, frameRate, direction: -1 });
   },
-  Period: ({ video, frameRate }) => {
+  Period: ({ state: { video }, frameRate }) => {
     seekFrameByFrame({ video, frameRate, direction: 1 });
   },
 } as const;
