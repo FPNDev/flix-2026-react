@@ -82,7 +82,6 @@ export function SourceForm() {
         setFiles(files);
         setIsLoadingFiles(false);
       }
-      clearTimeout(indexingDebounced);
     } catch (err) {
       if (err instanceof Error) {
         addToast({
@@ -92,8 +91,9 @@ export function SourceForm() {
         });
       }
       setIsLoadingFiles(false);
-      clearTimeout(indexingDebounced);
     }
+
+    clearTimeout(indexingDebounced);
   };
 
   const playSelectedFile = useEffectEvent(async (url: string) => {
