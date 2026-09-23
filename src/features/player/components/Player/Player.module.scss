@@ -1,3 +1,5 @@
+@use '@/assets/scss/mixins' as *;
+
 .playerContainer {
   block-size: 0;
   flex: 1 auto;
@@ -12,6 +14,12 @@
     font-size: 1.75rem;
     font-family: var(--font-ui);
     line-height: var(--lh-normal);
+  }
+
+  @include untilVMin('mobile') {
+    &::cue {
+      font-size: 1rem;
+    }
   }
 }
 

@@ -6,7 +6,7 @@ import type shaka from 'shaka-player';
 type UsePlayerSubscriptionProps<T> = {
   player: shaka.Player | undefined;
   events: string[];
-  selector: (player: shaka.Player) => T;
+  selector: (player: shaka.Player, evt?: Event) => T;
   fallback: T;
 };
 
@@ -39,8 +39,8 @@ export function usePlayerSubscription<T>({
       return;
     }
 
-    const onPlayerEvent = () => {
-      store.set(selector(player));
+    const onPlayerEvent = (evt: Event) => {
+      store.set(selector(player, evt));
     };
 
     for (const eventName of events) {

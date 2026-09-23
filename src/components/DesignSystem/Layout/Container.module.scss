@@ -8,7 +8,7 @@
     max-inline-size: 880px;
   }
 
-  @include until('tablet') {
+  @include until('mobile') {
     padding-inline: var(--layout-gutter-mobile);
   }
 }

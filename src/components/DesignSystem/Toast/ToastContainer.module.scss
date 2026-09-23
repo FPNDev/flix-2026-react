@@ -2,18 +2,23 @@
 
 .toast-stack {
   position: fixed;
-  inset-block-end: var(--sp-6);
-  inset-inline: var(--sp-6);
+  inset-block: var(--sp-6);
+  inset-inline-end: var(--sp-6);
   z-index: var(--z-toast);
   display: flex;
   flex-direction: column;
+  justify-content: flex-end;
   align-items: flex-end;
   gap: var(--sp-2);
   pointer-events: none;
 
-  @include untilInline('mobile') {
+  @include untilVMin('mobile') {
     align-items: center;
     inset-inline: var(--sp-3);
-    inset-block-end: calc(var(--toast-block-offset, 0px) + var(--sp-3));
+    inset-block-start: var(--sp-3);
+    inset-block-end: unset;
+    max-block-size: calc(
+      100dvb - (var(--toast-block-offset, 0px) + var(--sp-3) * 2)
+    );
   }
 }

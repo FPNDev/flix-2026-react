@@ -1,6 +1,7 @@
 import { useShakaPlayer } from './useShakaPlayer';
 import { useSourcePlayer } from './useSourcePlayer';
 import { useAudioTrackSelection } from './useAudioTrackSelection';
+import { useNextTrackPicker } from './useBestTrackPicker';
 
 type UsePlayerSessionProps = {
   video: HTMLVideoElement | undefined;
@@ -33,6 +34,14 @@ export function usePlayerSession({ video }: UsePlayerSessionProps) {
     navigateAudioTracks,
   } = useAudioTrackSelection({
     player,
+  });
+
+  useNextTrackPicker({
+    audioTracks,
+    sourceURI: activeURI,
+    player,
+    selectedAudioTrackIndex,
+    selectAudioTrack,
   });
 
   return {

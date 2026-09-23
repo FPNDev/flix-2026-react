@@ -6,7 +6,7 @@ type Props = {
   offset?: string;
 };
 
-export function ToastContainer({ offset = '0' }: Props) {
+export function ToastContainer({ offset = '0px' }: Props) {
   const toasts = useToastStates();
 
   return (
