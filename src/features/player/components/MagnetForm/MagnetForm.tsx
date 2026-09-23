@@ -24,7 +24,7 @@ const getManifestURL = (magnetURI: string, fileIndex: number) => {
 
 export function MagnetForm() {
   const { addToast } = useToast();
-  const { playFromURL } = usePlayerActions();
+  const { playFromURL, focusPlayer } = usePlayerActions();
   const { player, isLoading, videoTracks, selectedVideoTrackIndex } =
     usePlayerState();
 
@@ -44,6 +44,8 @@ export function MagnetForm() {
       return;
     }
 
+    focusPlayer();
+
     const urlToPlay = magnetInput.value;
     const fileName = files.length ? files[selectedFileIndex].name : magnetURI;
     if (
@@ -59,9 +61,18 @@ export function MagnetForm() {
       return;
     }
 
+    const indexingDebounced = setTimeout(() => {
+      addToast({
+        icon: 'playlist_play',
+        text: `Indexing magnet URI: ${urlToPlay}`,
+        variant: 'success',
+      });
+    }, 500);
+
     setMagnetURI(urlToPlay);
     setFiles([]);
     setIsLoadingFiles(true);
+
     try {
       const files = await fetchPlayableFiles(
         urlToPlay,
@@ -71,6 +82,7 @@ export function MagnetForm() {
         setFiles(files);
         setIsLoadingFiles(false);
       }
+      clearTimeout(indexingDebounced);
     } catch (err) {
       if (err instanceof Error) {
         addToast({
@@ -80,12 +92,27 @@ export function MagnetForm() {
         });
       }
       setIsLoadingFiles(false);
+      clearTimeout(indexingDebounced);
     }
   };
 
   const playSelectedFile = useEffectEvent(async (url: string) => {
     const file = files[selectedFileIndex];
+
+    let loadingDebounced: number | undefined = undefined;
+    if (file) {
+      loadingDebounced = setTimeout(() => {
+        addToast({
+          icon: 'playlist_play',
+          text: `Loading file: ${file.name}`,
+          variant: 'success',
+        });
+      }, 500);
+      focusPlayer();
+    }
+
     const played = await playFromURL(url);
+    clearTimeout(loadingDebounced);
 
     if (played && file) {
       addToast({
