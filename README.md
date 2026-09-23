@@ -8,12 +8,12 @@ Solved:
 - [x] Integrate player with media remuxer
 - [x] Add hooks for tracks switching
 - [x] Add basic hotkeys and basic subtitle / audio track control
+- [x] Split source logic from player -
+      it shall be pure HLS, form handles source
 
 Next steps:
 
-- [x] Split source logic from player -
-      it shall be pure HLS, form handles source
-- [ ] Migrate src/assets/scss/components to SCSS modules
+- [ ] Migrate all base component from src/assets/scss/components to SCSS modules
 - [ ] Implement Player UI:
   - [ ] Base UI (play/pause, volume, fullscreen, title)
   - [ ] Subtitles picker

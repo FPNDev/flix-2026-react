@@ -24,7 +24,7 @@ const getManifestURL = (sourceURI: string, fileIndex: number) => {
 
 export function SourceForm() {
   const { addToast } = useToast();
-  const { playFromURL } = usePlayerActions();
+  const { playFromURL, focusPlayer } = usePlayerActions();
   const { player, isLoading, videoTracks, selectedVideoTrackIndex } =
     usePlayerState();
 
@@ -44,6 +44,8 @@ export function SourceForm() {
       return;
     }
 
+    focusPlayer();
+
     const urlToPlay = sourceInput.value;
     const fileName = files.length ? files[selectedFileIndex].name : sourceURI;
     if (
@@ -59,9 +61,18 @@ export function SourceForm() {
       return;
     }
 
+    const indexingDebounced = setTimeout(() => {
+      addToast({
+        icon: 'playlist_play',
+        text: `Indexing source URI: ${urlToPlay}`,
+        variant: 'success',
+      });
+    }, 500);
+
     setSourceURI(urlToPlay);
     setFiles([]);
     setIsLoadingFiles(true);
+
     try {
       const files = await fetchPlayableFiles(
         urlToPlay,
@@ -71,6 +82,7 @@ export function SourceForm() {
         setFiles(files);
         setIsLoadingFiles(false);
       }
+      clearTimeout(indexingDebounced);
     } catch (err) {
       if (err instanceof Error) {
         addToast({
@@ -80,12 +92,27 @@ export function SourceForm() {
         });
       }
       setIsLoadingFiles(false);
+      clearTimeout(indexingDebounced);
     }
   };
 
   const playSelectedFile = useEffectEvent(async (url: string) => {
     const file = files[selectedFileIndex];
+
+    let loadingDebounced: number | undefined = undefined;
+    if (file) {
+      loadingDebounced = setTimeout(() => {
+        addToast({
+          icon: 'playlist_play',
+          text: `Loading file: ${file.name}`,
+          variant: 'success',
+        });
+      }, 500);
+      focusPlayer();
+    }
+
     const played = await playFromURL(url);
+    clearTimeout(loadingDebounced);
 
     if (played && file) {
       addToast({
