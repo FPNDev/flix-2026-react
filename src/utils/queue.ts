@@ -50,8 +50,8 @@ export function queue(): Queue {
 
   return {
     add: <T>(item: () => Promise<T>) => {
-      let resolveItem: ((val: T) => void) | undefined = undefined;
-      let rejectItem: ((err: unknown) => void) | undefined = undefined;
+      let resolveItem: (val: T) => void;
+      let rejectItem: (err: unknown) => void;
       const promise = new Promise<T>((resolve, reject) => {
         resolveItem = resolve;
         rejectItem = reject;

@@ -47,7 +47,8 @@ export function MagnetForm() {
     focusPlayer();
 
     const urlToPlay = magnetInput.value;
-    const fileName = files.length ? files[selectedFileIndex].name : magnetURI;
+    const fileName =
+      files.length > 0 ? files[selectedFileIndex].name : magnetURI;
     if (
       urlToPlay &&
       magnetURI === urlToPlay &&
@@ -99,7 +100,7 @@ export function MagnetForm() {
   const playSelectedFile = useEffectEvent(async (url: string) => {
     const file = files[selectedFileIndex];
 
-    let loadingDebounced: number | undefined = undefined;
+    let loadingDebounced: number;
     if (file) {
       loadingDebounced = setTimeout(() => {
         addToast({
@@ -112,7 +113,7 @@ export function MagnetForm() {
     }
 
     const played = await playFromURL(url);
-    clearTimeout(loadingDebounced);
+    clearTimeout(loadingDebounced!);
 
     if (played && file) {
       addToast({

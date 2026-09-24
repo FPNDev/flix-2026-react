@@ -98,12 +98,12 @@ export function useTrackSelection<T extends keyof TrackType>({
   const [selectedTrackIndex, setSelectedTrackIndex] = useState(defaultIndex);
 
   const select = (selectedIndex: SelectedIndex<T>, showToast = false) => {
-    if (!player || !tracks.length) {
+    if (!player || tracks.length === 0) {
       return;
     }
 
     const newTrack =
-      selectedIndex !== undefined ? tracks[selectedIndex as number] : undefined;
+      typeof selectedIndex === 'number' ? tracks[selectedIndex] : undefined;
 
     const displayToast = showToast
       ? (failed?: boolean) => {
@@ -155,14 +155,14 @@ export function useTrackSelection<T extends keyof TrackType>({
       return;
     }
 
-    if (trackType === 'TextTrack') {
-      if (
-        (selectedTrackIndex === tracks.length - 1 && direction === 1) ||
-        (selectedTrackIndex === 0 && direction === -1)
-      ) {
-        select(defaultIndex, true);
-        return;
-      }
+    if (
+      (trackType === 'TextTrack' &&
+        selectedTrackIndex === tracks.length - 1 &&
+        direction === 1) ||
+      (selectedTrackIndex === 0 && direction === -1)
+    ) {
+      select(defaultIndex, true);
+      return;
     }
 
     select(

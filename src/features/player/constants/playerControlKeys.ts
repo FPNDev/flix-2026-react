@@ -24,14 +24,14 @@ export const PLAYER_CONTROL_KEYS: KeyActions = {
   KeyF: ({ state: { playerContainer } }) => toggleFullscreen(playerContainer),
   Enter: ({ state: { playerContainer } }) => toggleFullscreen(playerContainer),
   KeyC: ({ state, actions, event: { shiftKey, altKey } }) => {
-    if (!state.textTracks.length) {
+    if (state.textTracks.length === 0) {
       return;
     }
 
     if (!shiftKey) {
-      return state.selectedTextTrackIndex !== undefined
-        ? actions.disableTextTrack(true)
-        : actions.selectTextTrack(0, true);
+      return state.selectedTextTrackIndex === undefined
+        ? actions.selectTextTrack(0, true)
+        : actions.disableTextTrack(true);
     }
 
     return actions.navigateTextTracks(altKey ? -1 : 1);

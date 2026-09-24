@@ -30,5 +30,5 @@ export const FullscreenPortal = ({ children }: React.PropsWithChildren) => {
     return createPortal(children, fullscreenElement);
   }
 
-  return <>{children}</>;
+  return children;
 };

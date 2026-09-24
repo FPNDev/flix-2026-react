@@ -2,12 +2,15 @@
   "$schema": "./node_modules/oxlint/configuration_schema.json",
   "plugins": ["react", "typescript", "oxc", "unicorn"],
   "categories": {
-    "correctness": "error"
+    "correctness": "error",
+    "pedantic": "error",
+    "perf": "error"
   },
   "rules": {
     "react/exhaustive-deps": "off",
     "curly": ["error", "all"],
-    "unicorn/no-array-for-each": "error"
+    "max-lines-per-function": "off",
+    "no-redeclare": "off"
   },
   "ignorePatterns": [
     "dist/*",

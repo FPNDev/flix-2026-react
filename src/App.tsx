@@ -1,8 +1,8 @@
 import { FullscreenPortal } from './components/DesignSystem/FullscreenPortal';
 import { ToastContainer, ToastProvider } from './components/DesignSystem/Toast';
 import classes from './App.module.scss';
-import { PlayerWithForm } from './features/player/components/PlayerWithForm';
 import { setMediaSessionMetadata } from './features/player/utils/media-session';
+import { Outlet } from 'react-router';
 
 setMediaSessionMetadata('FLIX');
 
@@ -13,7 +13,7 @@ function App() {
         <ToastContainer />
       </FullscreenPortal>
       <div className={classes.page}>
-        <PlayerWithForm />
+        <Outlet />
       </div>
     </ToastProvider>
   );

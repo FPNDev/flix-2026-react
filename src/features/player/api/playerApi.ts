@@ -38,7 +38,7 @@ export async function fetchPlayableFiles(
   }
 
   const playable = data.files.filter((file) => file.playable);
-  if (!playable.length) {
+  if (playable.length === 0) {
     throw new Error('URI has no playable files');
   }
 
