@@ -1,4 +1,5 @@
 import App from '@/App';
+import { PlayerPage } from '@/pages/PlayerPage';
 import type { RouteObject } from 'react-router';
 
 export const routes = {
@@ -12,7 +13,7 @@ export const routerConfig: RouteObject[] = [
     children: [
       {
         index: true,
-        lazy: () => import('@/pages/PlayerPage'),
+        Component: PlayerPage,
       },
     ],
   },
