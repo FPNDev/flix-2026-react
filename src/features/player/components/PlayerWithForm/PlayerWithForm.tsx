@@ -1,22 +1,18 @@
-import { lazy, Suspense } from 'react';
 import classes from './PlayerWithForm.module.scss';
 import { MediaFilesProvider } from '../../context/MediaFilesProvider';
-
-const LazyPlayerProvider = lazy(() => import('../../context/PlayerProvider'));
-const LazyPlayer = lazy(() => import('../Player/Player'));
-const LazySourceForm = lazy(() => import('../SourceForm/SourceForm'));
+import PlayerProvider from '../../context/PlayerProvider';
+import Player from '../Player/Player';
+import { SourceForm } from '../SourceForm';
 
 export function PlayerWithForm() {
   return (
     <div className={classes.container}>
-      <Suspense fallback={'Loading...'}>
-        <MediaFilesProvider>
-          <LazyPlayerProvider>
-            <LazyPlayer />
-            <LazySourceForm />
-          </LazyPlayerProvider>
-        </MediaFilesProvider>
-      </Suspense>
+      <MediaFilesProvider>
+        <PlayerProvider>
+          <Player />
+          <SourceForm />
+        </PlayerProvider>
+      </MediaFilesProvider>
     </div>
   );
 }
