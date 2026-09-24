@@ -24,7 +24,7 @@ export function Icon<T extends React.ElementType = 'div'>({
   const classNameBuilt = clsx(className, [
     classes.icon,
     classes[`s-${size}`],
-    ...(variant !== undefined ? [classes[variant]] : []),
+    ...(variant === undefined ? [] : [classes[variant]]),
   ]);
   return (
     <Component

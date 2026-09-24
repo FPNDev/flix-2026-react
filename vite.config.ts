@@ -34,7 +34,7 @@ export default defineConfig({
   },
 
   server: {
-    host: process.env.NODE_ENV !== 'development' ? true : false,
+    host: process.env.NODE_ENV === 'development' ? false : true,
   },
   css: {
     modules: { localsConvention: 'camelCase' },
@@ -50,17 +50,17 @@ export default defineConfig({
           groups: [
             {
               name: 'react-vendor',
-              test: /node_modules[\\/]react/,
+              test: /node_modules[\\/]react/u,
               priority: 3,
             },
             {
               name: 'shaka-vendor',
-              test: /shaka-player\.stripped/,
+              test: /shaka-player\.stripped/u,
               priority: 2,
             },
             {
               name: 'vendor',
-              test: /node_modules/,
+              test: /node_modules/u,
               priority: 1,
             },
             {

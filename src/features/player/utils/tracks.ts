@@ -13,7 +13,7 @@ export function getTrackDisplayName<T extends TrackType[keyof TrackType]>(
     parts.push(trackLabel);
   }
 
-  if ((withLanguage || !parts.length) && track.language !== 'und') {
+  if ((withLanguage || parts.length === 0) && track.language !== 'und') {
     let languageName: string | undefined;
     try {
       languageName = LANGUAGE_NAMES.of(track.language);
@@ -67,5 +67,5 @@ export function findBestMatchForTrack<T extends keyof TrackType>(
     }
   }
 
-  return bestPrimaryScore !== -1 ? bestPrimaryTrackIndex : bestTrackIndex;
+  return bestPrimaryScore === -1 ? bestTrackIndex : bestPrimaryTrackIndex;
 }

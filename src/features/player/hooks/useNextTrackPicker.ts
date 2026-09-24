@@ -35,7 +35,7 @@ export function useNextTrackPicker<T extends keyof TrackType>({
   const selectBestTrack = useEffectEvent(selectTrack);
 
   useEffect(() => {
-    if (player && tracks.length) {
+    if (player && tracks.length > 0) {
       if (lastTrackRef.current) {
         const bestTrackIndex = findBestMatchForTrack(
           trackType,
@@ -45,22 +45,23 @@ export function useNextTrackPicker<T extends keyof TrackType>({
 
         if (bestTrackIndex !== undefined) {
           selectBestTrack(bestTrackIndex);
-        } else {
-          selectDefault();
+          return;
         }
-
-        return;
       }
       selectDefault();
     }
   }, [player, tracks, trackType]);
 
   useEffect(() => {
-    if (!tracks.length) {
+    if (tracks.length === 0) {
       return;
     }
 
-    lastTrackRef.current =
-      selectedTrackIndex !== undefined ? tracks[selectedTrackIndex] : null;
+    if (selectedTrackIndex !== undefined) {
+      lastTrackRef.current = tracks[selectedTrackIndex];
+      return;
+    }
+
+    lastTrackRef.current = null;
   }, [tracks, selectedTrackIndex]);
 }

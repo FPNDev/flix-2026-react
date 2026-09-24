@@ -47,7 +47,8 @@ export function SourceForm() {
     focusPlayer();
 
     const urlToPlay = sourceInput.value;
-    const fileName = files.length ? files[selectedFileIndex].name : sourceURI;
+    const fileName =
+      files.length > 0 ? files[selectedFileIndex].name : sourceURI;
     if (
       urlToPlay &&
       sourceURI === urlToPlay &&
@@ -99,7 +100,7 @@ export function SourceForm() {
   const playSelectedFile = useEffectEvent(async (url: string) => {
     const file = files[selectedFileIndex];
 
-    let loadingDebounced: number | undefined = undefined;
+    let loadingDebounced: number;
     if (file) {
       loadingDebounced = setTimeout(() => {
         addToast({
@@ -112,7 +113,7 @@ export function SourceForm() {
     }
 
     const played = await playFromURL(url);
-    clearTimeout(loadingDebounced);
+    clearTimeout(loadingDebounced!);
 
     if (played && file) {
       addToast({
