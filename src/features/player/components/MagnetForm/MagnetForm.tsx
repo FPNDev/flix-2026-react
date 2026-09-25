@@ -65,7 +65,7 @@ export function MagnetForm() {
     const indexingDebounced = setTimeout(() => {
       addToast({
         icon: 'playlist_play',
-        text: `Indexing magnet URI: ${urlToPlay}`,
+        text: `Indexing ${urlToPlay}`,
         variant: 'success',
       });
     }, 500);

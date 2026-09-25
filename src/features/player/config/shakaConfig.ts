@@ -3,12 +3,13 @@ export const SHAKA_CONFIG = {
     enabled: false,
   },
   streaming: {
+    bufferingGoal: 60,
     retryParameters: {
       connectionTimeout: 0,
       stallTimeout: 0,
       timeout: 150_000,
     },
-    segmentPrefetchLimit: 2,
+    segmentPrefetchLimit: 3,
   },
   manifest: {
     retryParameters: {
