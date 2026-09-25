@@ -8,7 +8,7 @@ import {
 } from 'react';
 import shaka from 'shaka-player';
 import { useToast } from '@/components/DesignSystem/Toast';
-import { SHAKA_CONFIG } from '../config/shaka';
+import { SHAKA_CONFIG } from '../config/shakaConfig';
 import { loadURL } from '../utils/shaka';
 import { isRemuxerError } from '../utils/httpErrors';
 

@@ -65,7 +65,7 @@ export function SourceForm() {
     const indexingDebounced = setTimeout(() => {
       addToast({
         icon: 'playlist_play',
-        text: `Indexing source URI: ${urlToPlay}`,
+        text: `Indexing ${urlToPlay}`,
         variant: 'success',
       });
     }, 500);
