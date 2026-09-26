@@ -19,10 +19,5 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": [
-    "vite.config.ts",
-    "pwa/*.ts",
-    "pwa-assets.config.ts",
-    "pwa.config.ts"
-  ]
+  "include": ["./*.config.ts", "pwa/*.ts"]
 }

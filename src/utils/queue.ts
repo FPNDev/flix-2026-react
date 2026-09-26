@@ -1,6 +1,6 @@
 export type Queue = {
   add: (item: () => Promise<unknown>) => Promise<unknown>;
-  onIdle: (callback: () => void) => void;
+  onIdle: () => Promise<void>;
 };
 /**
  * Creates a queue of promises, useful to keep async effects consecutive
@@ -13,38 +13,37 @@ export function queue(): Queue {
     (value: unknown) => void,
     (err: unknown) => void,
   ][] = [];
-  const callbacks: (() => void)[] = [];
+
+  let reportIdle: () => void;
+  let onIdle$ = Promise.resolve();
 
   let working = false;
+  function refreshOnIdle() {
+    onIdle$ = new Promise<void>((resolve) => {
+      reportIdle = resolve;
+    });
+  }
 
-  function processQueue() {
+  async function processQueue() {
     if (items.length === 0) {
       working = false;
-      const callbackToRun = [...callbacks];
-      callbacks.length = 0;
-      for (const cb of callbackToRun) {
-        cb();
-      }
-
+      reportIdle();
       return;
     }
 
-    working = true;
+    if (!working) {
+      refreshOnIdle();
+      working = true;
+    }
 
     const [item, resolveItem, rejectItem] = items.shift()!;
-    let res;
+
     try {
-      res = item();
-      if (res instanceof Promise) {
-        res.then(resolveItem, rejectItem).finally(() => {
-          processQueue();
-        });
-      } else {
-        resolveItem(res);
-        processQueue();
-      }
+      resolveItem(await item());
     } catch (err) {
       rejectItem(err);
+    } finally {
+      processQueue();
     }
   }
 
@@ -64,12 +63,6 @@ export function queue(): Queue {
 
       return promise;
     },
-    onIdle: (callback) => {
-      if (working) {
-        callbacks.push(callback);
-      } else {
-        callback();
-      }
-    },
+    onIdle: () => onIdle$,
   };
 }

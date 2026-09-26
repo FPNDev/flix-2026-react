@@ -52,23 +52,12 @@
     block-size: var(--sp-5);
     padding-inline: var(--sp-1);
   }
-  // --xs keeps the widest descriptor (BDRip 4K HDR 5.1) on one line inside a poster card
   &--xs {
     block-size: var(--sp-4);
     padding-inline: var(--sp-1);
     letter-spacing: var(--ls-normal);
   }
 }
-
-// The descriptor over artwork. Each facet carries its OWN dark backing
-// rather than sitting in one shared capsule: a single capsule is a flex
-// container, so when the facets wrap it stretches to the full card width
-// and the short second line leaves a slab of empty background.
-//
-// Every chip also gets a near-opaque dark PLATE behind its facet tint.
-// The tints are 12-16% alpha, which vanishes over a bright poster (the
-// 5.1 chip on a pale sky was the worst case). The plate is a ::before at
-// z-index -1, so the tint still reads as colour but always against black.
 .quality--card {
   gap: var(--sp-1);
   align-items: flex-start;
@@ -98,7 +87,6 @@
   .qtag--res {
     color: var(--violet-200);
   }
-  // solid-fill facets are already opaque
   .qtag--res-4k::before,
   .qtag--hdr::before {
     display: none;
@@ -199,17 +187,6 @@
   }
 }
 
-// One quality, with its sources underneath.
-//
-// Clicking the row SELECTS the quality and takes its most reliable
-// source automatically — that is the point of the strength estimate,
-// and it spares the viewer a second decision they usually do not care
-// about. The chevron is a separate target that reveals the source list
-// for anyone who wants to override.
-//
-// Two hidden inputs drive it, so it stays script-free:
-//   .qopt__pick    radio    — which quality is chosen
-//   .qopt__toggle  checkbox — whether its sources are showing
 .qopt {
   background: var(--surface-raised);
   border: var(--bw-hair) solid var(--border-subtle);
@@ -284,7 +261,6 @@
     font-weight: var(--fw-medium);
     color: var(--text-tertiary);
   }
-  // the source FLIX picked for you, named so the choice is never hidden
   &__auto {
     font-size: var(--fs-caption);
     font-weight: var(--fw-bold);
@@ -307,7 +283,6 @@
     }
   }
 
-  // the expander is its own target, not the whole row
   &__chev {
     display: grid;
     place-items: center;
@@ -340,7 +315,6 @@
     display: none;
   }
 
-  // the source list is collapsed until the chevron is used
   .srclist {
     display: none;
   }
@@ -350,7 +324,6 @@
   }
 }
 
-// legacy <details class="qopt"> markup keeps working while callers migrate
 details.qopt {
   &[open] .srclist {
     display: flex;
@@ -363,7 +336,6 @@ details.qopt {
   }
 }
 
-// A single-source quality is not a dropdown — the row IS the source.
 .qrow {
   position: relative;
   display: flex;
@@ -602,10 +574,6 @@ details.qopt {
   }
 }
 
-// Mobile: commit explicitly. On a phone the picker is a curtain, and a
-// tap that both selects a quality and starts a stream is too easy to
-// make by accident. Sources stay inert until their quality is selected,
-// and an Apply button in the footer commits the pair.
 @include until('tablet') {
   .qsel--commit .qopt:not(:has(.qopt__pick:checked)) {
     .srclist {

@@ -12,11 +12,16 @@ export default defineConfig({
     babel({ presets: [reactCompilerPreset()] }),
     VitePWA({
       registerType: 'autoUpdate',
+      strategies: 'injectManifest',
+      srcDir: 'src/workers',
+      filename: 'sw.ts',
       pwaAssets: {
         config: true,
       },
       devOptions: {
         enabled: true,
+        type: 'module',
+        navigateFallback: 'index.html',
       },
       manifest: {
         ...PWAConfig,
@@ -32,7 +37,6 @@ export default defineConfig({
       ),
     },
   },
-
   server: {
     host: process.env.NODE_ENV === 'development' ? false : true,
   },

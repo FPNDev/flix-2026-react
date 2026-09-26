@@ -11,6 +11,7 @@ import { useToast } from '@/components/DesignSystem/Toast';
 import { SHAKA_CONFIG } from '../config/shakaConfig';
 import { loadURL } from '../utils/shaka';
 import { isRemuxerError } from '../utils/httpErrors';
+import { attachShakaCache } from '@/utils/shakaCache';
 
 type Props = {
   video: HTMLVideoElement | undefined;
@@ -56,6 +57,12 @@ export function useShakaPlayer({ video }: Props) {
     const newPlayerQueue = queue();
 
     newPlayer.configure(SHAKA_CONFIG);
+    newPlayerQueue.add(() =>
+      navigator.serviceWorker.ready.then(() => {
+        attachShakaCache(newPlayer);
+      }),
+    );
+
     if (import.meta.env.DEV) {
       (window as any)['__shakaPlayer'] = newPlayer;
     }
@@ -82,20 +89,22 @@ export function useShakaPlayer({ video }: Props) {
   }, [video, player, playerQueue]);
 
   const playFromURL = async (url: string) => {
-    if (!player || !video) {
+    if (!player || !playerQueue || !video) {
       return false;
     }
 
     setActiveURI(url);
     if (!url) {
-      player.unload();
+      playerQueue.onIdle().then(() => player.unload());
       return false;
     }
 
     setIsLoading(true);
 
     try {
-      const loaded = await loadURL(player, url);
+      const loaded = await playerQueue
+        .onIdle()
+        .then(() => loadURL(player, url));
       if (loaded) {
         video.play();
         setIsLoading(false);

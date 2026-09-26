@@ -12,7 +12,6 @@
   border: var(--bw-hair) solid var(--border-default);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-xl);
-  // closed state
   opacity: 0;
   visibility: hidden;
   transform: translateY(var(--sp-2)) scale(0.98);
@@ -22,7 +21,6 @@
     transform var(--dur-quick) var(--ease-entrance),
     visibility var(--dur-quick) var(--ease-standard);
 
-  // anchoring — above the transport row
   &--br {
     inset-block-end: calc(var(--control-h-lg) + var(--sp-8));
     inset-inline-end: var(--sp-5);
@@ -39,7 +37,6 @@
     inline-size: min(300px, calc(100% - var(--sp-8)));
   }
 
-  // a beak pointing down at the control that opened it
   &__beak {
     position: absolute;
     inset-block-end: calc(var(--sp-2) * -1);
@@ -91,8 +88,6 @@
     color: var(--text-tertiary);
   }
 
-  // inside a panel the quality rows lose their card chrome — the panel
-  // already provides the surface, so a second border is noise
   .qopt {
     background: transparent;
     border-color: transparent;
@@ -235,7 +230,6 @@
     }
   }
 
-  // the Off row is separated from the tracks
   &--off {
     border-block-end: var(--bw-hair) solid var(--border-subtle);
     border-radius: var(--radius-md) var(--radius-md) 0 0;
