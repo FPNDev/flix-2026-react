@@ -9,7 +9,7 @@ export function magnetRemuxerURI(
   pathname: string,
   queryParams?: Record<string, Serializable | Serializable[]>,
 ) {
-  const url = new URL(import.meta.env.VITE_MAGNET_REMUXER_URI);
+  const url = new URL(import.meta.env.VITE_MAGNET_REMUXER_URI as string);
   url.pathname = pathname;
   if (queryParams) {
     for (const [key, value] of Object.entries(queryParams)) {

@@ -25,7 +25,7 @@ export function Group<T extends React.ElementType = 'div'>({
   className,
   ...props
 }: GroupProps<T>) {
-  const Component = as || 'div';
+  const Component = as ?? 'div';
   const classNameBuilt = clsx(className, [
     classes.group,
     classes[variant],

@@ -42,20 +42,28 @@ type KeyActions = Record<string, (params: ActionParams) => boolean | void>;
  * Video player general stateless hotkeys (advanced stateful ones are part of usePlayerControlKeys directly)
  */
 export const PLAYER_CONTROL_KEYS: KeyActions = {
-  KeyF: ({ state: { playerContainer } }) => toggleFullscreen(playerContainer),
-  Enter: ({ state: { playerContainer } }) => toggleFullscreen(playerContainer),
+  KeyF: ({ state: { playerContainer } }) => {
+    void toggleFullscreen(playerContainer);
+  },
+  Enter: ({ state: { playerContainer } }) => {
+    void toggleFullscreen(playerContainer);
+  },
   KeyC: ({ state, actions, event: { shiftKey, altKey } }) => {
     if (state.textTracks.length === 0) {
       return;
     }
 
     if (!shiftKey) {
-      return state.selectedTextTrackIndex === undefined
-        ? actions.selectTextTrack(0, true)
-        : actions.disableTextTrack(true);
+      if (state.selectedTextTrackIndex === undefined) {
+        actions.selectTextTrack(0, true);
+      } else {
+        actions.disableTextTrack(true);
+      }
+
+      return;
     }
 
-    return actions.navigateTextTracks(altKey ? -1 : 1);
+    actions.navigateTextTracks(altKey ? -1 : 1);
   },
   KeyA: ({ actions, event: { shiftKey } }) => {
     actions.navigateAudioTracks(shiftKey ? -1 : 1);
@@ -91,7 +99,7 @@ export const PLAYER_CONTROL_KEYS: KeyActions = {
       video.duration &&
       video.readyState >= video.HAVE_CURRENT_DATA
     ) {
-      video.play();
+      void video.play();
     } else {
       video.pause();
     }

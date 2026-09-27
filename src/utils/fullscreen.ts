@@ -1,24 +1,24 @@
 function requestFullscreen(element: Element) {
   if (element.requestFullscreen) {
-    element.requestFullscreen();
+    return element.requestFullscreen();
   } else if (element.webkitRequestFullscreen) {
-    element.webkitRequestFullscreen();
+    return element.webkitRequestFullscreen();
   } else if (element.msRequestFullscreen) {
-    element.msRequestFullscreen();
+    return element.msRequestFullscreen();
   }
 }
 
 function exitFullscreen(element?: Element) {
   if (element?.webkitExitFullscreen) {
-    element.webkitExitFullscreen();
+    return element.webkitExitFullscreen();
   }
 
   if (document.exitFullscreen) {
-    document.exitFullscreen();
+    return document.exitFullscreen();
   } else if (document.webkitExitFullscreen) {
-    document.webkitExitFullscreen();
+    return document.webkitExitFullscreen();
   } else if (document.msExitFullscreen) {
-    document.msExitFullscreen();
+    return document.msExitFullscreen();
   }
 }
 
@@ -30,8 +30,8 @@ export function toggleFullscreen(element: Element) {
 
 export function getFullscreenElement() {
   return (
-    document.fullscreenElement ||
-    document.webkitFullscreenElement ||
+    document.fullscreenElement ??
+    document.webkitFullscreenElement ??
     document.msFullscreenElement
   );
 }

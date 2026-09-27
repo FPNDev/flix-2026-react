@@ -53,7 +53,7 @@ export default defineConfig(({ mode }) => {
     },
     build: {
       cssMinify: 'lightningcss',
-      rollupOptions: {
+      rolldownOptions: {
         output: {
           codeSplitting: {
             groups: [

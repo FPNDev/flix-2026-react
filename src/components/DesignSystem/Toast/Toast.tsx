@@ -20,10 +20,14 @@ export function Toast({ toast }: Props) {
   const isRemoving = toast.status === ToastStatus.Removing;
 
   useEffect(() => {
-    const onWindowBlur = () => startRemovalTimeout(toast);
+    const onWindowBlur = () => {
+      startRemovalTimeout(toast);
+    };
     window.addEventListener('blur', onWindowBlur);
 
-    return () => window.removeEventListener('blur', onWindowBlur);
+    return () => {
+      window.removeEventListener('blur', onWindowBlur);
+    };
   }, [toast, startRemovalTimeout]);
 
   return (
@@ -37,11 +41,17 @@ export function Toast({ toast }: Props) {
       )}
       onAnimationEnd={
         toast.status === ToastStatus.Removing
-          ? () => removeToast(toast)
+          ? () => {
+              removeToast(toast);
+            }
           : undefined
       }
-      onPointerEnter={() => clearRemovalTimeout(toast)}
-      onPointerLeave={() => startRemovalTimeout(toast)}
+      onPointerEnter={() => {
+        clearRemovalTimeout(toast);
+      }}
+      onPointerLeave={() => {
+        startRemovalTimeout(toast);
+      }}
     >
       <Icon className={clsx(classes.icon, 'icon')} icon={toast.icon} />
       <div className={clsx(classes.text)} role="status" aria-atomic>
@@ -50,7 +60,9 @@ export function Toast({ toast }: Props) {
       {toast.action === ToastAction.Close && (
         <button
           className="icon-btn icon-btn--sm"
-          onClick={() => markForRemoval(toast)}
+          onClick={() => {
+            markForRemoval(toast);
+          }}
         >
           <Icon icon={'close'} />
         </button>

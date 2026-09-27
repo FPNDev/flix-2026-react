@@ -9,7 +9,9 @@ type Props = {
  * Autoplays next episode when the previous one ends
  */
 export function useAutoplayNextEpisode({ video, navigateFiles }: Props) {
-  const navigateNextFile = useEffectEvent(() => navigateFiles(1));
+  const navigateNextFile = useEffectEvent(() => {
+    navigateFiles(1);
+  });
 
   useEffect(() => {
     if (!video) {

@@ -59,6 +59,7 @@ export function MagnetForm() {
         text: `Already playing ` + fileName,
         variant: 'danger',
       });
+
       return;
     }
 
@@ -130,7 +131,7 @@ export function MagnetForm() {
       : '';
 
   useEffect(() => {
-    playSelectedFile(manifestURL);
+    void playSelectedFile(manifestURL);
   }, [manifestURL]);
 
   useMediaSessionMetadata({

@@ -1,6 +1,9 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
   "plugins": ["react", "typescript", "oxc", "unicorn"],
+  "options": {
+    "typeAware": true
+  },
   "categories": {
     "correctness": "error",
     "pedantic": "error",
@@ -9,9 +12,15 @@
   "rules": {
     "react/exhaustive-deps": "off",
     "curly": ["error", "all"],
+    "unicorn/no-array-for-each": "error",
+    "only-throw-error": "off",
+    "strict-void-return": "off",
     "max-lines-per-function": "off",
     "no-redeclare": "off",
-    "unicorn/no-array-for-each": "error",
+    "prefer-readonly-parameter-types": "off",
+    "strict-boolean-expressions": "off",
+    "no-misused-promises": "off",
+    "typescript/prefer-promise-reject-errors": "off",
     "react/only-export-components": ["warn", { "allowConstantExport": true }],
     "react/syntax": "error",
     "react/exhaustive-effect-dependencies": "error"

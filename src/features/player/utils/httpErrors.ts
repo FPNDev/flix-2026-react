@@ -29,10 +29,10 @@ export function parseShakaNetworkError<T>(
     return;
   }
 
-  const errorResponse = error.data[2];
-  let parsedError;
+  const errorResponse = error.data[2] as string;
+  let parsedError: T | undefined;
   try {
-    parsedError = JSON.parse(errorResponse);
+    parsedError = JSON.parse(errorResponse) as T | undefined;
   } catch {}
 
   return {
