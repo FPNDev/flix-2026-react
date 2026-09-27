@@ -3,7 +3,7 @@ import type shaka from 'shaka-player';
 import { usePlayerSubscription } from './usePlayerSubscription';
 import { useState } from 'react';
 import { isShakaActive } from '../utils/shaka';
-import type { TrackType } from '../types/tracks.types';
+import type { TrackType } from '../types/player.types';
 import { TRACK_SELECTION_TOASTS } from '../constants/trackSelection';
 
 type Props<T extends keyof TrackType> = {

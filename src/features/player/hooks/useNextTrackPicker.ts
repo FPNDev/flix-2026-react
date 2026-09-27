@@ -1,7 +1,7 @@
 import { useEffect, useEffectEvent, useRef } from 'react';
 import type shaka from 'shaka-player';
 import { useEventEffect } from '@/hooks/useEventEffect';
-import type { TrackType } from '../types/tracks.types';
+import type { TrackType } from '../types/player.types';
 import { findBestMatchForTrack } from '../utils/tracks';
 
 type Props<T extends keyof TrackType> = {

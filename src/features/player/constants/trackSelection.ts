@@ -1,5 +1,5 @@
 import type { ToastInfo } from '@/components/DesignSystem/Toast';
-import type { TrackType } from '../types/tracks.types';
+import type { TrackType } from '../types/player.types';
 import { getTrackDisplayName } from '../utils/tracks';
 
 type MessageGroup = {
@@ -8,13 +8,6 @@ type MessageGroup = {
 
 type DisabledMessageGroup = {
   [key in keyof TrackType]?: () => ToastInfo;
-};
-
-type CompareFields = {
-  [key in keyof TrackType]: {
-    primary: keyof TrackType[key];
-    fields: (keyof TrackType[key])[];
-  };
 };
 
 export const TRACK_SELECTION_TOASTS: {
@@ -52,20 +45,5 @@ export const TRACK_SELECTION_TOASTS: {
       text: `Failed to switch video track to ${getTrackDisplayName(track)}`,
       icon: 'playlist_remove',
     }),
-  },
-};
-
-export const TRACK_COMPARE_FIELDS: CompareFields = {
-  AudioTrack: {
-    primary: 'language',
-    fields: ['channelsCount', 'spatialAudio', 'audioSamplingRate', 'label'],
-  },
-  TextTrack: {
-    primary: 'language',
-    fields: ['label'],
-  },
-  VideoTrack: {
-    primary: 'language',
-    fields: ['bandwidth', 'hdr', 'width', 'height'],
   },
 };

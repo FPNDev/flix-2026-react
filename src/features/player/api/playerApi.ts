@@ -1,12 +1,32 @@
 import { handleHttpError } from '@/api/errors';
-import { magnetRemuxerURI } from './urls';
 import type { FilesResponse } from '../types/mediaFiles.types';
 import { isAbortError } from '@/utils/abort';
 
-export async function fetchMediaFiles<T>(
-  magnetURI: string,
-  signal?: AbortSignal,
+/**
+ * Generates a URL to magnet-link media remuxer endpoint
+ */
+export function magnetRemuxerURI(
+  pathname: string,
+  queryParams?: Record<string, Serializable | Serializable[]>,
 ) {
+  const url = new URL(import.meta.env.VITE_MAGNET_REMUXER_URI);
+  url.pathname = pathname;
+  if (queryParams) {
+    for (const [key, value] of Object.entries(queryParams)) {
+      if (Array.isArray(value)) {
+        for (const entry of value as Serializable[]) {
+          url.searchParams.append(key, entry.toString());
+        }
+      } else {
+        url.searchParams.set(key, value.toString());
+      }
+    }
+  }
+
+  return url.toString();
+}
+
+async function fetchMediaFiles<T>(magnetURI: string, signal?: AbortSignal) {
   const response = await fetch(
     magnetRemuxerURI('files', { magnet: magnetURI }),
     {
@@ -34,6 +54,7 @@ export async function fetchPlayableFiles(
     if (!isAbortError(err)) {
       throw new Error('Failed to fetch file list for specified URI');
     }
+
     return;
   }
 

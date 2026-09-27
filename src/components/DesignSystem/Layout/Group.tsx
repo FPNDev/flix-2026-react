@@ -1,7 +1,10 @@
 import type { PropsWithAs } from '@/types/utils.types';
 import clsx from 'clsx';
 import classes from './Group.module.scss';
-import type { Spacing } from './Layout.types';
+
+type Spacings = [0, 1, 2, 3, 4, 5, 6, 8, 10];
+
+type Spacing = Spacings[number];
 
 export type GroupProps<T extends React.ElementType> = React.PropsWithChildren<
   PropsWithAs<

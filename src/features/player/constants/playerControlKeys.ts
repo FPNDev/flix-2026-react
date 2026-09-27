@@ -1,8 +1,29 @@
 import { toggleFullscreen } from '@/utils/fullscreen';
-import { seekFrameByFrame } from '../utils/seeking';
-import { SEEK_STEP } from '../config/controls';
 import type { PlayerActions, PlayerState } from '../types/player.types';
 import type { MediaFileActions } from '../types/mediaFiles.types';
+
+const SEEK_STEP = 5;
+
+type SeekFrameByFrameParams = {
+  video: HTMLVideoElement;
+  direction: -1 | 1;
+  frameRate: number;
+};
+
+function seekFrameByFrame({
+  video,
+  direction,
+  frameRate,
+}: SeekFrameByFrameParams) {
+  if (!video.duration || !frameRate) {
+    return;
+  }
+  if (!video.paused) {
+    video.pause();
+  }
+
+  video.currentTime += direction / frameRate;
+}
 
 type ActionParams = {
   event: KeyboardEvent;

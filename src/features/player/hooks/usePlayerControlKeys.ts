@@ -16,7 +16,6 @@ export function usePlayerControlKeys() {
   const onKeyUp = useEffectEvent((ev: KeyboardEvent) => {
     const { code } = ev;
 
-    // Generic video controls - volume, fullscreen etc - state agnostic
     if (code in PLAYER_CONTROL_KEYS) {
       ev.preventDefault();
       return PLAYER_CONTROL_KEYS[code]({

@@ -1,7 +1,12 @@
 import { useReducer, useRef } from 'react';
 import { ToastStatus, type ToastInfo, type ToastState } from './Toast.types';
-import { DEFAULTS } from './Toast.constants';
 import { ToastDispatchContext, ToastStatesContext } from './ToastContext';
+
+const DEFAULTS = {
+  maxItems: 5,
+  duration: 2000,
+  variant: 'accent',
+} as const;
 
 type ToastsReducerAction =
   | {

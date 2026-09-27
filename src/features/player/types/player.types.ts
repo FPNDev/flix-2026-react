@@ -25,3 +25,9 @@ export type PlayerActions = {
   playFromURL: (magnetURL: string) => Promise<boolean>;
   focusPlayer: () => void;
 };
+
+export type TrackType = {
+  AudioTrack: shaka.extern.AudioTrack;
+  VideoTrack: shaka.extern.VideoTrack;
+  TextTrack: shaka.extern.TextTrack;
+};

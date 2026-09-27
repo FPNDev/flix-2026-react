@@ -6,7 +6,7 @@ import { usePlayerActions, usePlayerState } from '../../context/PlayerContext';
 import { isShakaActive } from '../../utils/shaka';
 import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { TrackSelectors } from '../TrackSelectors';
-import { magnetRemuxerURI } from '../../api/urls';
+import { magnetRemuxerURI } from '../../api/playerApi';
 import {
   useMediaFileActions,
   useMediaFiles,

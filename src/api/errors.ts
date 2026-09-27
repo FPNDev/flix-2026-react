@@ -1,4 +1,4 @@
-export class HttpError<T> {
+class HttpError<T> {
   public status!: number;
   public url!: string;
   public data?: T;

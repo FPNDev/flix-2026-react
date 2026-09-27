@@ -185,7 +185,6 @@
   transform: translateY(0);
 }
 
-// Below tablet a responsive modal re-forms as a bottom sheet.
 @include until('tablet') {
   .modal--responsive {
     place-items: end stretch;

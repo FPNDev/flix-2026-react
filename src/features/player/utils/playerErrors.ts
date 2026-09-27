@@ -1,7 +1,7 @@
 import shaka from 'shaka-player';
 import { isRemuxerError, parseShakaNetworkError } from './httpErrors';
 
-export function isShakaError(error: unknown): error is shaka.util.Error {
+function isShakaError(error: unknown): error is shaka.util.Error {
   return (
     typeof error === 'object' &&
     error !== null &&

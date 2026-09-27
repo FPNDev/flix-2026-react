@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react';
 import type { ToastInfo, ToastState } from './Toast.types';
-import { useContextOrThrow } from '@/utils/context';
+import { useContextOrThrow } from '@/hooks/useContextOrThrow';
 
 type ToastDispatchFn<T extends ToastInfo = ToastInfo, R = T> = (toast: T) => R;
 
