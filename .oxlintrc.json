@@ -23,7 +23,8 @@
     "typescript/prefer-promise-reject-errors": "off",
     "react/only-export-components": ["warn", { "allowConstantExport": true }],
     "react/syntax": "error",
-    "react/exhaustive-effect-dependencies": "error"
+    "react/exhaustive-effect-dependencies": "error",
+    "no-await-in-loop": "off"
   },
   "ignorePatterns": [
     "dist/*",
