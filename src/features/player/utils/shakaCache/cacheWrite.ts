@@ -21,7 +21,9 @@ export async function fetchToCache(
   const armStall = () => {
     clearTimeout(stallTimer);
     if (stallTimeout) {
-      stallTimer = setTimeout(() => stall.abort(), stallTimeout);
+      stallTimer = setTimeout(() => {
+        stall.abort();
+      }, stallTimeout);
     }
   };
 

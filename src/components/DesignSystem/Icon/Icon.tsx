@@ -20,7 +20,7 @@ export function Icon<T extends React.ElementType = 'div'>({
   className,
   ...props
 }: Props<T>) {
-  const Component = as || 'div';
+  const Component = as ?? 'div';
   const classNameBuilt = clsx(className, [
     classes.icon,
     classes[`s-${size}`],

@@ -59,14 +59,15 @@ export function useShakaPlayer({ video }: Props) {
     newPlayer.configure(SHAKA_CONFIG);
 
     if (import.meta.env.DEV) {
-      (window as any)['__shakaPlayer'] = newPlayer;
+      (window as unknown as Record<string, unknown>)['__shakaPlayer'] =
+        newPlayer;
     }
 
     store.set({ player: newPlayer, playerQueue: newPlayerQueue });
 
     return () => {
       store.set(null);
-      newPlayerQueue.add(() => newPlayer.destroy());
+      void newPlayerQueue.add(() => newPlayer.destroy());
     };
   }, [store]);
 
@@ -76,12 +77,12 @@ export function useShakaPlayer({ video }: Props) {
       return;
     }
 
-    playerQueue.add(() => player.attach(video));
+    void playerQueue.add(() => player.attach(video));
     const detachCache = attachShakaCache(player, video);
 
     return () => {
       detachCache();
-      playerQueue.add(() => player.detach());
+      void playerQueue.add(() => player.detach());
     };
   }, [video, player, playerQueue]);
 
@@ -92,7 +93,7 @@ export function useShakaPlayer({ video }: Props) {
 
     setActiveURI(url);
     if (!url) {
-      playerQueue.onIdle().then(() => player.unload());
+      void playerQueue.onIdle().then(() => player.unload());
       return false;
     }
 
@@ -103,7 +104,7 @@ export function useShakaPlayer({ video }: Props) {
         .onIdle()
         .then(() => loadURL(player, url));
       if (loaded) {
-        video.play();
+        void video.play();
         setIsLoading(false);
       }
 

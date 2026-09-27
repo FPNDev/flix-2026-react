@@ -29,9 +29,9 @@ export function useNextTrackPicker<T extends keyof TrackType>({
     lastTrackRef.current = null;
   }, [assetId]);
 
-  const selectDefault = useEffectEvent(() =>
-    selectTrack(defaultIndex as number),
-  );
+  const selectDefault = useEffectEvent(() => {
+    selectTrack(defaultIndex as number);
+  });
   const selectBestTrack = useEffectEvent(selectTrack);
 
   useEffect(() => {

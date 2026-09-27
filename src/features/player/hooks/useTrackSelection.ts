@@ -43,18 +43,22 @@ function selectTrack<T extends keyof TrackType>(
       bufferDuration?: number,
     ) => void;
   } = {
-    AudioTrack: (audioTrack, bufferDuration) =>
-      player.selectAudioTrack(audioTrack, bufferDuration),
-    VideoTrack: (newTrack, nextBufferDuration) =>
+    AudioTrack: (audioTrack, bufferDuration) => {
+      player.selectAudioTrack(audioTrack, bufferDuration);
+    },
+    VideoTrack: (newTrack, nextBufferDuration) => {
       player.selectVideoTrack(
         newTrack,
         !!nextBufferDuration,
         nextBufferDuration,
-      ),
-    TextTrack: (track) => player.selectTextTrack(track),
+      );
+    },
+    TextTrack: (track) => {
+      player.selectTextTrack(track);
+    },
   };
 
-  return selectors[trackType](track, bufferDuration);
+  selectors[trackType](track, bufferDuration);
 }
 
 function disableTrack(player: shaka.Player, trackType: keyof TrackType) {

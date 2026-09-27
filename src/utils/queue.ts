@@ -43,25 +43,20 @@ export function queue(): Queue {
     } catch (err) {
       rejectItem(err);
     } finally {
-      processQueue();
+      void processQueue();
     }
   }
 
   return {
     add: <T>(item: () => Promise<T>) => {
-      let resolveItem: (val: T) => void;
-      let rejectItem: (err: unknown) => void;
-      const promise = new Promise<T>((resolve, reject) => {
-        resolveItem = resolve;
-        rejectItem = reject;
-      });
+      const { promise, resolve, reject } = Promise.withResolvers<unknown>();
 
-      items.push([item, resolveItem! as (v: unknown) => void, rejectItem!]);
+      items.push([item, resolve, reject]);
       if (!working) {
-        processQueue();
+        void processQueue();
       }
 
-      return promise;
+      return promise as Promise<T>;
     },
     onIdle: () => onIdle$,
   };

@@ -16,10 +16,10 @@ export async function handleHttpError(res: Response) {
   }
 
   const errorText = await res.text().catch(() => {});
-  let errorData = errorText;
+  let errorData: unknown = errorText;
   if (errorText) {
     try {
-      errorData = JSON.parse(errorText);
+      errorData = JSON.parse(errorText) as unknown;
     } catch {
       // Data already assigned to text - skip
     }

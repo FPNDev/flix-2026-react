@@ -17,7 +17,7 @@ export function Container<T extends React.ElementType = 'div'>({
   className,
   ...props
 }: Props<T>) {
-  const Component = as || 'div';
+  const Component = as ?? 'div';
   const classNameBuilt = clsx(className, [
     classes.container,
     ...(narrow ? [classes.narrow] : []),

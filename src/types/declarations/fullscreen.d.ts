@@ -1,13 +1,13 @@
 interface Element {
-  webkitRequestFullscreen?();
-  msRequestFullscreen?();
+  webkitRequestFullscreen?(): Promise<void>;
+  msRequestFullscreen?(): Promise<void>;
 
-  webkitExitFullscreen?();
+  webkitExitFullscreen?(): Promise<void>;
 }
 
 interface Document {
-  webkitExitFullscreen?();
-  msExitFullscreen?();
+  webkitExitFullscreen?(): Promise<void>;
+  msExitFullscreen?(): Promise<void>;
 
   webkitFullscreenElement?: Element;
   msFullscreenElement?: Element;

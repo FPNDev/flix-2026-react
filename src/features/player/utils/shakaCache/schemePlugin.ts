@@ -68,7 +68,7 @@ export const cachePlugin: shaka.extern.SchemePlugin = (
       progressUpdated,
       headersReceived,
       config,
-    );
+    ) as shaka.extern.IAbortableOperation<shaka.extern.Response>;
     return networkOperation.promise;
   })();
 
