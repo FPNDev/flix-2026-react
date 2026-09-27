@@ -10,7 +10,11 @@
     "react/exhaustive-deps": "off",
     "curly": ["error", "all"],
     "max-lines-per-function": "off",
-    "no-redeclare": "off"
+    "no-redeclare": "off",
+    "unicorn/no-array-for-each": "error",
+    "react/only-export-components": ["warn", { "allowConstantExport": true }],
+    "react/syntax": "error",
+    "react/exhaustive-effect-dependencies": "error"
   },
   "ignorePatterns": [
     "dist/*",
