@@ -9,8 +9,8 @@ export const SHAKA_CONFIG = {
     bufferingGoal: 30,
     retryParameters: {
       maxAttempts: 5,
-      connectionTimeout: 10_000,
-      stallTimeout: 15_000,
+      connectionTimeout: 0,
+      stallTimeout: 0,
       timeout: 180_000,
     },
     segmentPrefetchLimit: 1,
