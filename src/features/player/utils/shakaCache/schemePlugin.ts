@@ -1,14 +1,16 @@
 import shaka from 'shaka-player';
-import { CACHE_PREFIX, toCacheKey } from './segmentCache';
-import type { CacheEntry } from './segmentCache';
+import { toCacheKey } from './segmentCache';
+import type { SegmentCache } from './segmentCache';
 
-type CacheStore = {
-  entries: Map<string, CacheEntry>;
-  openCache: () => Promise<Cache>;
-  onServed: () => void;
-};
+export const stores = new Set<SegmentCache>();
 
-export const stores = new Map<string, CacheStore>();
+function findStore(key: string) {
+  for (const store of stores) {
+    if (store.entries.has(key)) {
+      return store;
+    }
+  }
+}
 
 export const cachePlugin: shaka.extern.SchemePlugin = (
   uri,
@@ -18,10 +20,25 @@ export const cachePlugin: shaka.extern.SchemePlugin = (
   headersReceived,
   config,
 ) => {
-  const separator = uri.indexOf('/');
-  const store = stores.get(uri.slice(CACHE_PREFIX.length, separator));
-  const originalUri = decodeURIComponent(uri.slice(separator + 1));
-  const key = toCacheKey(originalUri, request.headers.Range);
+  const fetchNetwork = () =>
+    shaka.net.HttpFetchPlugin.parse(
+      uri,
+      request,
+      type,
+      progressUpdated,
+      headersReceived,
+      config,
+    ) as shaka.extern.IAbortableOperation<shaka.extern.Response>;
+
+  if (type !== shaka.net.NetworkingEngine.RequestType.SEGMENT) {
+    return fetchNetwork();
+  }
+
+  const key = toCacheKey(uri, request.headers.Range);
+  const store = findStore(key);
+  if (!store) {
+    return fetchNetwork();
+  }
 
   let aborted = false;
   let networkOperation: Maybe<
@@ -29,29 +46,26 @@ export const cachePlugin: shaka.extern.SchemePlugin = (
   >;
 
   const promise = (async (): Promise<shaka.extern.Response> => {
-    const data = store?.entries.has(key)
-      ? await store
-          .openCache()
-          .then((cache) => cache.match(key))
-          .then((cached) => cached?.arrayBuffer())
-          .catch(() => null)
-      : undefined;
+    const data = await store
+      .open()
+      .then((cache) => cache.match(key))
+      .then((cached) => cached?.arrayBuffer())
+      .catch(() => null);
 
     if (aborted) {
       throw new shaka.util.Error(
         shaka.util.Error.Severity.RECOVERABLE,
         shaka.util.Error.Category.NETWORK,
         shaka.util.Error.Code.OPERATION_ABORTED,
-        originalUri,
+        uri,
         type,
       );
     }
 
     if (data) {
-      store?.onServed();
       return {
-        uri: originalUri,
-        originalUri,
+        uri,
+        originalUri: uri,
         data,
         status: 200,
         headers: {},
@@ -60,15 +74,8 @@ export const cachePlugin: shaka.extern.SchemePlugin = (
       };
     }
 
-    store?.entries.delete(key);
-    networkOperation = shaka.net.HttpFetchPlugin.parse(
-      originalUri,
-      request,
-      type,
-      progressUpdated,
-      headersReceived,
-      config,
-    ) as shaka.extern.IAbortableOperation<shaka.extern.Response>;
+    store.entries.delete(key);
+    networkOperation = fetchNetwork();
     return networkOperation.promise;
   })();
 
@@ -77,19 +84,3 @@ export const cachePlugin: shaka.extern.SchemePlugin = (
     return networkOperation?.abort() ?? Promise.resolve();
   });
 };
-
-export function createRequestFilter(
-  cacheName: string,
-  entries: Map<string, CacheEntry>,
-): shaka.extern.RequestFilter {
-  return (type, request) => {
-    const [uri] = request.uris;
-    if (
-      type === shaka.net.NetworkingEngine.RequestType.SEGMENT &&
-      uri &&
-      entries.has(toCacheKey(uri, request.headers.Range))
-    ) {
-      request.uris = [`${cacheName}/${encodeURIComponent(uri)}`];
-    }
-  };
-}
