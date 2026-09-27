@@ -3,6 +3,7 @@ import { fetchToCache, hasQuota, isQuotaExceeded } from './cacheWrite';
 import type { SegmentCache } from './segmentCache';
 import { createCursors, nextSegment } from './segmentCursors';
 import type { NextSegment, StreamCursor } from './segmentCursors';
+import { msUntilShakaIdle } from './shakaActivity';
 
 const QUOTA_CHECK_INTERVAL = 20;
 
@@ -49,7 +50,7 @@ export function createPrefetcher(
 
   const reposition = () => {
     abortPrefetch();
-    cursors = createCursors(player, video);
+    cursors = createCursors(player);
     wake();
   };
 
@@ -57,6 +58,10 @@ export function createPrefetcher(
     abortPrefetch();
     segmentCache.clear();
   };
+
+  const shakaBufferedEnd = () =>
+    player.getBufferedInfo().total.find(({ end }) => end > video.currentTime)
+      ?.end ?? video.currentTime;
 
   const evictPlayed = () => {
     const activeStreamIds = new Set(cursors.map(({ stream }) => stream.id));
@@ -68,7 +73,7 @@ export function createPrefetcher(
   };
 
   const prefetch = async (segment: NextSegment) => {
-    const { cursor, reference, key } = segment;
+    const { cursor, position, reference, key } = segment;
     const { signal } = controller;
     const target = await segmentCache.open().catch(() => null);
     if (!target) {
@@ -107,7 +112,7 @@ export function createPrefetcher(
       failedAttempts = failedKey === key ? failedAttempts + 1 : 1;
       failedKey = key;
       if (failedAttempts >= maxAttempts) {
-        cursor.position += 1;
+        cursor.position = position + 1;
         return;
       }
 
@@ -128,13 +133,14 @@ export function createPrefetcher(
       quotaFull = !(await evictPlayed().catch(() => false));
     }
 
-    const windowEnd =
-      video.currentTime + player.getConfiguration().streaming.bufferingGoal;
+    const shakaIdleIn = msUntilShakaIdle();
     const next =
-      quotaFull || player.isBuffering()
+      quotaFull || shakaIdleIn > 0
         ? undefined
-        : nextSegment(cursors, segmentCache.entries, windowEnd);
-    await (next ? prefetch(next) : sleep());
+        : nextSegment(cursors, segmentCache.entries, shakaBufferedEnd());
+    await (next
+      ? prefetch(next)
+      : sleep(shakaIdleIn > 0 ? shakaIdleIn : undefined));
 
     void prefetchNext();
   };

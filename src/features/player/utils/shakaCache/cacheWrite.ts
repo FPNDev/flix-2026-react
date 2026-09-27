@@ -3,7 +3,7 @@ import type shaka from 'shaka-player';
 import { anyAbortSignal } from '@/utils/abort';
 import type { NextSegment } from './segmentCursors';
 
-const QUOTA_USAGE_LIMIT = 0.9;
+const QUOTA_USAGE_LIMIT = 0.75;
 
 export async function fetchToCache(
   cache: Cache,

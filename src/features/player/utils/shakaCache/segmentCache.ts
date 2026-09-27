@@ -1,4 +1,4 @@
-export const CACHE_SCHEME = 'shaka-cache';
+const CACHE_SCHEME = 'shaka-cache';
 export const CACHE_PREFIX = `${CACHE_SCHEME}:`;
 
 export type CacheEntry = {

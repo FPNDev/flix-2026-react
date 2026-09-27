@@ -1,13 +1,13 @@
 import shaka from 'shaka-player';
 
 import { createPrefetcher } from './prefetcher';
-import { cachePlugin, createRequestFilter, stores } from './schemePlugin';
+import { cachePlugin, stores } from './schemePlugin';
 import {
   CACHE_PREFIX,
-  CACHE_SCHEME,
   createSegmentCache,
   holdCacheLock,
 } from './segmentCache';
+import { trackSegmentActivity } from './shakaActivity';
 
 const REPOSITION_EVENTS = [
   'loaded',
@@ -16,26 +16,29 @@ const REPOSITION_EVENTS = [
   'trackschanged',
 ];
 
+const HTTP_SCHEMES = ['http', 'https'];
+const httpPlugin = trackSegmentActivity(cachePlugin);
+
 export function attachShakaCache(
   player: shaka.Player,
   video: HTMLMediaElement,
 ) {
-  const networkingEngine = player.getNetworkingEngine();
-  if (!networkingEngine || !('caches' in window)) {
+  if (!player.getNetworkingEngine() || !('caches' in window)) {
     return () => null;
   }
 
-  shaka.net.NetworkingEngine.registerScheme(
-    CACHE_SCHEME,
-    cachePlugin,
-    shaka.net.NetworkingEngine.PluginPriority.APPLICATION,
-  );
+  for (const scheme of HTTP_SCHEMES) {
+    shaka.net.NetworkingEngine.registerScheme(
+      scheme,
+      httpPlugin,
+      shaka.net.NetworkingEngine.PluginPriority.APPLICATION,
+      true,
+    );
+  }
 
-  const instanceId = crypto.randomUUID();
-  const cacheName = `${CACHE_PREFIX}${instanceId}`;
+  const cacheName = `${CACHE_PREFIX}${crypto.randomUUID()}`;
   const segmentCache = createSegmentCache(cacheName);
   const prefetcher = createPrefetcher(player, video, segmentCache);
-  const requestFilter = createRequestFilter(cacheName, segmentCache.entries);
   const { reposition, wake, stop } = prefetcher;
 
   const onPageHide = () => {
@@ -43,17 +46,12 @@ export function attachShakaCache(
     reposition();
   };
 
-  stores.set(instanceId, {
-    entries: segmentCache.entries,
-    openCache: segmentCache.open,
-    onServed: wake,
-  });
-  networkingEngine.registerRequestFilter(requestFilter);
+  stores.add(segmentCache);
 
   for (const event of REPOSITION_EVENTS) {
     player.addEventListener(event, reposition);
   }
-  player.addEventListener('buffering', wake);
+  player.addEventListener('segmentappended', wake);
   player.addEventListener('unloading', stop);
   video.addEventListener('seeking', reposition);
   window.addEventListener('pagehide', onPageHide);
@@ -65,13 +63,12 @@ export function attachShakaCache(
   return () => {
     prefetcher.dispose();
     releaseLock();
-    stores.delete(instanceId);
-    networkingEngine.unregisterRequestFilter(requestFilter);
+    stores.delete(segmentCache);
 
     for (const event of REPOSITION_EVENTS) {
       player.removeEventListener(event, reposition);
     }
-    player.removeEventListener('buffering', wake);
+    player.removeEventListener('segmentappended', wake);
     player.removeEventListener('unloading', stop);
     video.removeEventListener('seeking', reposition);
     window.removeEventListener('pagehide', onPageHide);

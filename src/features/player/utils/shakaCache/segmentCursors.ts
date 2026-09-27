@@ -4,18 +4,20 @@ import type { CacheEntry } from './segmentCache';
 
 export type StreamCursor = {
   stream: shaka.extern.Stream;
-  position: number;
+  // Shaka builds a switched-to stream's index after the switch event fires.
+  position: Maybe<number>;
 };
 
 export type NextSegment = {
   cursor: StreamCursor;
+  position: number;
   reference: shaka.media.SegmentReference;
   uri: string;
   range: Maybe<string>;
   key: string;
 };
 
-export function createCursors(player: shaka.Player, video: HTMLMediaElement) {
+export function createCursors(player: shaka.Player) {
   const cursors: StreamCursor[] = [];
   const manifest = player.getManifest();
   if (!manifest || player.isLive()) {
@@ -30,32 +32,35 @@ export function createCursors(player: shaka.Player, video: HTMLMediaElement) {
     variant?.audio,
     manifest.textStreams.find((item) => item.id === textId),
   ];
-  const startTime =
-    video.currentTime + player.getConfiguration().streaming.bufferingGoal;
-
   for (const stream of streams) {
-    const position = stream?.segmentIndex?.find(startTime) as Maybe<number>;
-    if (stream && position !== null && position !== undefined) {
-      cursors.push({ stream, position });
+    if (stream) {
+      cursors.push({ stream, position: undefined });
     }
   }
 
   return cursors;
 }
 
+// MSE buffered ranges drift from segment times by about a frame.
+const BUFFERED_END_TOLERANCE = 0.1;
+
 export function nextSegment(
   cursors: StreamCursor[],
   entries: Map<string, CacheEntry>,
-  windowEnd: number,
+  bufferedEnd: number,
 ) {
   let next: Maybe<NextSegment>;
 
   for (const cursor of cursors) {
+    cursor.position ??= cursor.stream.segmentIndex?.find(
+      bufferedEnd,
+    ) as Maybe<number>;
     let candidate: Maybe<NextSegment>;
 
-    while (!candidate) {
+    while (!candidate && typeof cursor.position === 'number') {
+      const { position } = cursor;
       const reference = cursor.stream.segmentIndex?.get(
-        cursor.position,
+        position,
       ) as Maybe<shaka.media.SegmentReference>;
       if (!reference) {
         break;
@@ -73,12 +78,12 @@ export function nextSegment(
       if (
         uri &&
         key &&
-        reference.getEndTime() > windowEnd &&
+        reference.getStartTime() >= bufferedEnd - BUFFERED_END_TOLERANCE &&
         !entries.has(key)
       ) {
-        candidate = { cursor, reference, uri, range, key };
+        candidate = { cursor, position, reference, uri, range, key };
       } else {
-        cursor.position += 1;
+        cursor.position = position + 1;
       }
     }
 
