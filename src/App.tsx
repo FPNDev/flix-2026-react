@@ -1,7 +1,7 @@
 import { FullscreenPortal } from './components/DesignSystem/FullscreenPortal';
 import { ToastContainer, ToastProvider } from './components/DesignSystem/Toast';
 import classes from './App.module.scss';
-import { setMediaSessionMetadata } from './features/player/utils/media-session';
+import { setMediaSessionMetadata } from './utils/mediaSession';
 import { Outlet } from 'react-router';
 
 setMediaSessionMetadata('FLIX');

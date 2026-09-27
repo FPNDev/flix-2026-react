@@ -1,4 +1,4 @@
-import { useContextOrThrow } from '@/utils/context';
+import { useContextOrThrow } from '@/hooks/useContextOrThrow';
 import { createContext } from 'react';
 import type { PlayerActions, PlayerState } from '../types/player.types';
 

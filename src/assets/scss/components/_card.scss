@@ -1,4 +1,3 @@
-// FLIX — scss/components/_card.scss
 @use '../mixins' as *;
 
 .card {
@@ -48,7 +47,6 @@
   }
 }
 
-// Artwork placeholder. FLIX ships no bundled imagery.
 .art {
   position: relative;
   display: grid;
@@ -221,8 +219,6 @@
     gap: var(--sp-1);
     z-index: var(--z-raised);
   }
-  // full-width slot for the quality descriptor: the widest facet set
-  // (BDRip 4K HDR 5.1) has to fit on one line inside a poster card
   &__facets {
     position: absolute;
     inset-block-end: var(--sp-2);

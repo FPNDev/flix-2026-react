@@ -1,6 +1,6 @@
-import type { TrackType } from '../types/tracks.types';
+import { TRACK_COMPARE_FIELDS } from '../constants/tracksComparion';
+import type { TrackType } from '../types/player.types';
 import { LANGUAGE_NAMES } from '@/constants/languageNames';
-import { TRACK_COMPARE_FIELDS } from '../constants/trackSelection';
 
 export function getTrackDisplayName<T extends TrackType[keyof TrackType]>(
   track: T,

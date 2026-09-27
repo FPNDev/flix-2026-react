@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import type shaka from 'shaka-player';
-import { setMediaSessionMetadata } from '../utils/media-session';
+import { setMediaSessionMetadata } from '@/utils/mediaSession';
 import type { MediaFile } from '../types/mediaFiles.types';
 import { getTrackDisplayName } from '../utils/tracks';
 
@@ -13,8 +13,10 @@ export function useMediaSessionMetadata({ videoTrack, currentFile }: Props) {
   useEffect(() => {
     if (!videoTrack || !currentFile) {
       setMediaSessionMetadata('FLIX');
+
       return;
     }
+
     setMediaSessionMetadata(
       `${currentFile.name} - ${getTrackDisplayName(videoTrack)}`,
     );

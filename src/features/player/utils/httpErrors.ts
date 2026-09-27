@@ -1,5 +1,13 @@
 import shaka from 'shaka-player';
-import type { RemuxerError, ShakaHttpError } from '../types/httpErrors.types';
+
+type ShakaHttpError<T> = {
+  status: number | null;
+  data?: T;
+};
+
+type RemuxerError = {
+  error: string;
+};
 
 export function isRemuxerError(error: unknown): error is RemuxerError {
   return (
@@ -10,7 +18,7 @@ export function isRemuxerError(error: unknown): error is RemuxerError {
   );
 }
 
-export function isShakaNetworkingError(error: shaka.extern.Error): boolean {
+function isShakaNetworkingError(error: shaka.extern.Error): boolean {
   return error.category === shaka.util.Error.Category.NETWORK;
 }
 

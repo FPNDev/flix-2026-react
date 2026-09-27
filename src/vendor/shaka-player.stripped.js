@@ -32009,9 +32009,6 @@
       return b;
     };
     q.Se = function () {
-      Va(
-        "Shaka Player's internal Manifest structure is NOT covered by semantic versioning compatibility guarantees.  It may change at any time!  Please consider filing a feature request for whatever you use getManifest() for.",
-      );
       return this.j;
     };
     q.Ci = function () {

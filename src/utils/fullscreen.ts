@@ -1,4 +1,4 @@
-export function requestFullscreen(element: Element) {
+function requestFullscreen(element: Element) {
   if (element.requestFullscreen) {
     element.requestFullscreen();
   } else if (element.webkitRequestFullscreen) {
@@ -8,7 +8,7 @@ export function requestFullscreen(element: Element) {
   }
 }
 
-export function exitFullscreen(element?: Element) {
+function exitFullscreen(element?: Element) {
   if (element?.webkitExitFullscreen) {
     element.webkitExitFullscreen();
   }
@@ -36,7 +36,7 @@ export function getFullscreenElement() {
   );
 }
 
-export function isFullscreen(element?: Element) {
+function isFullscreen(element?: Element) {
   const fullscreenElement = getFullscreenElement();
 
   return element ? fullscreenElement === element : !!fullscreenElement;
