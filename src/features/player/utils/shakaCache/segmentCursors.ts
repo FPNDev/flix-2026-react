@@ -15,34 +15,39 @@ export type NextSegment = {
   uri: string;
   range: Maybe<string>;
   key: string;
+  entry: CacheEntry;
 };
 
-export function createCursors(player: shaka.Player) {
-  const cursors: StreamCursor[] = [];
+export function activeStreams(player: shaka.Player) {
   const manifest = player.getManifest();
-  if (!manifest || player.isLive()) {
-    return cursors;
+  if (!manifest) {
+    return [];
   }
 
   const variantId = player.getVariantTracks().find((track) => track.active)?.id;
   const textId = player.getTextTracks().find((track) => track.active)?.id;
   const variant = manifest.variants.find((item) => item.id === variantId);
-  const streams = [
+
+  return [
     variant?.video,
     variant?.audio,
     manifest.textStreams.find((item) => item.id === textId),
-  ];
-  for (const stream of streams) {
-    if (stream) {
-      cursors.push({ stream, position: undefined });
-    }
+  ].filter((stream) => !!stream);
+}
+
+export function createCursors(player: shaka.Player): StreamCursor[] {
+  if (player.isLive()) {
+    return [];
   }
 
-  return cursors;
+  return activeStreams(player).map((stream) => ({
+    stream,
+    position: undefined,
+  }));
 }
 
 // MSE buffered ranges drift from segment times by about a frame.
-const BUFFERED_END_TOLERANCE = 0.1;
+export const BUFFERED_END_TOLERANCE = 0.1;
 
 export function nextSegment(
   cursors: StreamCursor[],
@@ -55,6 +60,7 @@ export function nextSegment(
     cursor.position ??= cursor.stream.segmentIndex?.find(
       bufferedEnd,
     ) as Maybe<number>;
+
     let candidate: Maybe<NextSegment>;
 
     while (!candidate && typeof cursor.position === 'number') {
@@ -62,6 +68,7 @@ export function nextSegment(
       const reference = cursor.stream.segmentIndex?.get(
         position,
       ) as Maybe<shaka.media.SegmentReference>;
+
       if (!reference) {
         break;
       }
@@ -81,7 +88,19 @@ export function nextSegment(
         reference.getStartTime() >= bufferedEnd - BUFFERED_END_TOLERANCE &&
         !entries.has(key)
       ) {
-        candidate = { cursor, position, reference, uri, range, key };
+        candidate = {
+          cursor,
+          position,
+          reference,
+          uri,
+          range,
+          key,
+          entry: {
+            streamId: cursor.stream.id,
+            startTime: reference.getStartTime(),
+            endTime: reference.getEndTime(),
+          },
+        };
       } else {
         cursor.position = position + 1;
       }

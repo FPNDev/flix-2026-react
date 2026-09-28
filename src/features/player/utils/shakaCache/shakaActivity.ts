@@ -1,7 +1,5 @@
 import shaka from 'shaka-player';
 
-// Shaka re-checks its buffer every half updateIntervalSeconds once the goal is
-// met, while a buffer fill chains segment requests milliseconds apart.
 const IDLE_AFTER_MS = 200;
 
 let activeRequests = 0;
@@ -24,11 +22,13 @@ export function trackSegmentActivity(
       headersReceived,
       config,
     );
+
     if (type === shaka.net.NetworkingEngine.RequestType.SEGMENT) {
       activeRequests += 1;
       lastActivity = performance.now();
       void operation.promise.then(settle, settle);
     }
+
     return operation;
   };
 }

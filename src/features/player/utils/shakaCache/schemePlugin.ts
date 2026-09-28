@@ -12,6 +12,16 @@ function findStore(key: string) {
   }
 }
 
+async function readCached(store: SegmentCache, key: string) {
+  try {
+    const cache = await store.open();
+    const cached = await cache.match(key);
+    return await cached?.arrayBuffer();
+  } catch {
+    return null;
+  }
+}
+
 export const cachePlugin: shaka.extern.SchemePlugin = (
   uri,
   request,
@@ -46,11 +56,7 @@ export const cachePlugin: shaka.extern.SchemePlugin = (
   >;
 
   const promise = (async (): Promise<shaka.extern.Response> => {
-    const data = await store
-      .open()
-      .then((cache) => cache.match(key))
-      .then((cached) => cached?.arrayBuffer())
-      .catch(() => null);
+    const data = await readCached(store, key);
 
     if (aborted) {
       throw new shaka.util.Error(
@@ -74,7 +80,7 @@ export const cachePlugin: shaka.extern.SchemePlugin = (
       };
     }
 
-    store.entries.delete(key);
+    store.remove(key);
     networkOperation = fetchNetwork();
     return networkOperation.promise;
   })();
@@ -84,3 +90,35 @@ export const cachePlugin: shaka.extern.SchemePlugin = (
     return networkOperation?.abort() ?? Promise.resolve();
   });
 };
+
+export function createCacheResponseFilter(
+  segmentCache: SegmentCache,
+): shaka.extern.ResponseFilter {
+  return (_type, response, context) => {
+    const { type, stream, segment } = context ?? {};
+    if (
+      type !== shaka.net.NetworkingEngine.AdvancedRequestType.MEDIA_SEGMENT ||
+      !stream ||
+      !segment ||
+      response.fromCache ||
+      !(response.data instanceof ArrayBuffer)
+    ) {
+      return;
+    }
+
+    void segmentCache
+      .put(
+        toCacheKey(
+          response.originalUri,
+          response.originalRequest.headers.Range,
+        ),
+        {
+          streamId: stream.id,
+          startTime: segment.getStartTime(),
+          endTime: segment.getEndTime(),
+        },
+        new Blob([response.data]),
+      )
+      .catch(() => null);
+  };
+}
