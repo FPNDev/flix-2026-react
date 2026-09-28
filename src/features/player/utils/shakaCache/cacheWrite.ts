@@ -40,17 +40,16 @@ export async function fetchToCache(
       throw new Error(`Segment prefetch failed with ${response.status}`);
     }
 
-    const body = response.body.pipeThrough(
-      new TransformStream({
-        transform(chunk, stream) {
-          armStall();
-          stream.enqueue(chunk);
-        },
-      }),
-    );
-    const blob = await new Response(body).blob();
+    const reader = response.body.getReader();
+    const chunks: Uint8Array<ArrayBuffer>[] = [];
+    let result = await reader.read();
+    while (!result.done) {
+      armStall();
+      chunks.push(result.value);
+      result = await reader.read();
+    }
 
-    await segmentCache.put(key, entry, blob);
+    await segmentCache.put(key, entry, new Blob(chunks));
   } finally {
     clearTimeout(stallTimer);
   }
