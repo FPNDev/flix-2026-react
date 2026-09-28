@@ -97,12 +97,13 @@ export function createSegmentCache(
 
   const write = async (key: string, entry: CacheEntry, body: Blob) => {
     const target = open();
+    const opened = await target;
     if (quotaFull) {
-      await evict(await target, entry, body.size);
+      await evict(opened, entry, body.size);
     }
 
     try {
-      await (await target).put(key, new Response(body));
+      await opened.put(key, new Response(body));
     } catch (error) {
       if (!isQuotaExceeded(error)) {
         throw error;
