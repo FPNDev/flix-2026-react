@@ -25,8 +25,7 @@ export function usePlayerControlKeys() {
         },
         actions,
         fileActions,
-        frameRate:
-          state.videoTracks[state.selectedVideoTrackIndex]?.frameRate ?? 0,
+        frameRate: state.videoTrack?.frameRate ?? 0,
         event: ev,
       });
     }

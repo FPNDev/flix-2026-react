@@ -6,10 +6,9 @@ export type PlayerState = {
   player: shaka.Player | undefined;
   activeURI: string;
   isLoading: boolean;
-  videoTracks: shaka.extern.VideoTrack[];
+  videoTrack: shaka.extern.VideoTrack | undefined;
   audioTracks: shaka.extern.AudioTrack[];
   textTracks: shaka.extern.TextTrack[];
-  selectedVideoTrackIndex: number;
   selectedAudioTrackIndex: number;
   selectedTextTrackIndex: number | undefined;
 };
@@ -28,6 +27,5 @@ export type PlayerActions = {
 
 export type TrackType = {
   AudioTrack: shaka.extern.AudioTrack;
-  VideoTrack: shaka.extern.VideoTrack;
   TextTrack: shaka.extern.TextTrack;
 };

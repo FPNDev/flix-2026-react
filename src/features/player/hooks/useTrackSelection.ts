@@ -24,8 +24,6 @@ function getTracks<T extends keyof TrackType>(
   switch (trackType) {
     case 'AudioTrack':
       return player.getAudioTracks() as TrackType[T][];
-    case 'VideoTrack':
-      return player.getVideoTracks() as TrackType[T][];
     case 'TextTrack':
       return player.getTextTracks() as TrackType[T][];
   }
@@ -46,13 +44,6 @@ function selectTrack<T extends keyof TrackType>(
     AudioTrack: (audioTrack, bufferDuration) => {
       player.selectAudioTrack(audioTrack, bufferDuration);
     },
-    VideoTrack: (newTrack, nextBufferDuration) => {
-      player.selectVideoTrack(
-        newTrack,
-        !!nextBufferDuration,
-        nextBufferDuration,
-      );
-    },
     TextTrack: (track) => {
       player.selectTextTrack(track);
     },
@@ -64,8 +55,7 @@ function selectTrack<T extends keyof TrackType>(
 function disableTrack(player: shaka.Player, trackType: keyof TrackType) {
   switch (trackType) {
     case 'AudioTrack':
-    case 'VideoTrack':
-      throw new Error('Cannot deselect audio / video tracks');
+      throw new Error('Cannot deselect audio tracks');
     case 'TextTrack':
       player.selectTextTrack(null);
   }

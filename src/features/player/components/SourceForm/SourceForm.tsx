@@ -25,8 +25,7 @@ const getManifestURL = (sourceURI: string, fileIndex: number) => {
 export function SourceForm() {
   const { addToast } = useToast();
   const { playFromURL, focusPlayer } = usePlayerActions();
-  const { player, isLoading, videoTracks, selectedVideoTrackIndex } =
-    usePlayerState();
+  const { player, isLoading, videoTrack } = usePlayerState();
 
   const { files, selectedFileIndex } = useMediaFiles();
   const { setFiles } = useMediaFileActions();
@@ -136,7 +135,7 @@ export function SourceForm() {
 
   useMediaSessionMetadata({
     currentFile: files[selectedFileIndex],
-    videoTrack: videoTracks[selectedVideoTrackIndex],
+    videoTrack,
   });
 
   return (

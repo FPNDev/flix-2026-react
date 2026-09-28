@@ -16,8 +16,4 @@ export const TRACK_COMPARE_FIELDS: CompareFields = {
     primary: 'language',
     fields: ['label'],
   },
-  VideoTrack: {
-    primary: 'language',
-    fields: ['bandwidth', 'hdr', 'width', 'height'],
-  },
 };
