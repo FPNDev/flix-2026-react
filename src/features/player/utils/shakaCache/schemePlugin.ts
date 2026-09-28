@@ -106,19 +106,18 @@ export function createCacheResponseFilter(
       return;
     }
 
+    const key = toCacheKey(
+      response.originalUri,
+      response.originalRequest.headers.Range,
+    );
+    const entry = {
+      streamId: stream.id,
+      startTime: segment.getStartTime(),
+      endTime: segment.getEndTime(),
+    };
+
     void segmentCache
-      .put(
-        toCacheKey(
-          response.originalUri,
-          response.originalRequest.headers.Range,
-        ),
-        {
-          streamId: stream.id,
-          startTime: segment.getStartTime(),
-          endTime: segment.getEndTime(),
-        },
-        new Blob([response.data]),
-      )
+      .put(key, entry, new Blob([response.data]))
       .catch(() => null);
   };
 }

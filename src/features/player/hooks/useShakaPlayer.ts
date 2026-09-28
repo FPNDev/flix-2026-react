@@ -100,9 +100,8 @@ export function useShakaPlayer({ video }: Props) {
     setIsLoading(true);
 
     try {
-      const loaded = await playerQueue
-        .onIdle()
-        .then(() => loadURL(player, url));
+      await playerQueue.onIdle();
+      const loaded = await loadURL(player, url);
       if (loaded) {
         void video.play();
         setIsLoading(false);
