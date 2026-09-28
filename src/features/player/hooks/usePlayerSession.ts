@@ -1,6 +1,7 @@
 import { useShakaPlayer } from './useShakaPlayer';
 import { useTrackSelection } from './useTrackSelection';
 import { useNextTrackPicker } from './useNextTrackPicker';
+import { useVideoTrack } from './useVideoTrack';
 
 type Props = {
   video: HTMLVideoElement | undefined;
@@ -18,14 +19,7 @@ export function usePlayerSession({ video }: Props) {
     ? (new URL(activeURI).searchParams.get('magnet') ?? '')
     : '';
 
-  const {
-    tracks: videoTracks,
-    selectedTrackIndex: selectedVideoTrackIndex,
-    selectTrack: selectVideoTrack,
-  } = useTrackSelection({
-    player,
-    trackType: 'VideoTrack',
-  });
+  const videoTrack = useVideoTrack({ player });
 
   const {
     tracks: audioTracks,
@@ -47,16 +41,6 @@ export function usePlayerSession({ video }: Props) {
   } = useTrackSelection({
     player,
     trackType: 'TextTrack',
-  });
-
-  useNextTrackPicker({
-    trackType: 'VideoTrack',
-    tracks: videoTracks,
-    assetId,
-    player,
-    selectedTrackIndex: selectedVideoTrackIndex,
-    selectTrack: selectVideoTrack,
-    defaultIndex: 0,
   });
 
   useNextTrackPicker({
@@ -83,10 +67,9 @@ export function usePlayerSession({ video }: Props) {
     player,
     isLoading,
     activeURI,
-    videoTracks,
+    videoTrack,
     audioTracks,
     textTracks,
-    selectedVideoTrackIndex,
     selectedAudioTrackIndex,
     selectedTextTrackIndex,
     selectAudioTrack,

@@ -27,10 +27,6 @@ export const TRACK_SELECTION_TOASTS: {
       text: `Audio changed to ${getTrackDisplayName(track)}`,
       icon: 'queue_music',
     }),
-    VideoTrack: (track) => ({
-      text: `Video track changed to ${getTrackDisplayName(track)}`,
-      icon: 'playlist_play',
-    }),
   },
   failed: {
     TextTrack: (track) => ({
@@ -40,10 +36,6 @@ export const TRACK_SELECTION_TOASTS: {
     AudioTrack: (track) => ({
       text: `Failed to switch audio to ${getTrackDisplayName(track)}`,
       icon: 'music_off',
-    }),
-    VideoTrack: (track) => ({
-      text: `Failed to switch video track to ${getTrackDisplayName(track)}`,
-      icon: 'playlist_remove',
     }),
   },
 };

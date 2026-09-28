@@ -1,11 +1,11 @@
+import type shaka from 'shaka-player';
 import { TRACK_COMPARE_FIELDS } from '../constants/tracksComparion';
 import type { TrackType } from '../types/player.types';
 import { LANGUAGE_NAMES } from '@/constants/languageNames';
 
-export function getTrackDisplayName<T extends TrackType[keyof TrackType]>(
-  track: T,
-  withLanguage = false,
-) {
+export function getTrackDisplayName<
+  T extends TrackType[keyof TrackType] | shaka.extern.VideoTrack,
+>(track: T, withLanguage = false) {
   const trackLabel = track.label?.trim() ?? '';
 
   const parts = [];
