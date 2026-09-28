@@ -5,8 +5,8 @@ export const SHAKA_CONFIG = {
     enabled: false,
   },
   streaming: {
-    bufferBehind: 30,
-    bufferingGoal: 30,
+    bufferBehind: 0,
+    bufferingGoal: 10,
     retryParameters: {
       maxAttempts: 5,
       connectionTimeout: 0,
@@ -25,4 +25,5 @@ export const SHAKA_CONFIG = {
       disableClosedCaptionsDetection: true,
     },
   },
+  preferredVideo: [{ hdrLevel: 'AUTO' }],
 } as const satisfies DeepPartial<shaka.extern.PlayerConfiguration>;
