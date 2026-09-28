@@ -1,1 +1,1 @@
-export { attachShakaCache } from './attachShakaCache';
+export { attachShakaCache, getBufferedRanges } from './attachShakaCache';

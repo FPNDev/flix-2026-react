@@ -1,13 +1,12 @@
 import type shaka from 'shaka-player';
 
 import { anyAbortSignal } from '@/utils/abort';
+import type { SegmentCache } from './segmentCache';
 import type { NextSegment } from './segmentCursors';
 
-const QUOTA_USAGE_LIMIT = 0.75;
-
 export async function fetchToCache(
-  cache: Cache,
-  { uri, range, key }: NextSegment,
+  segmentCache: SegmentCache,
+  { uri, range, key, entry }: NextSegment,
   { stallTimeout, timeout }: shaka.extern.RetryParameters,
   signal: AbortSignal,
 ) {
@@ -29,19 +28,22 @@ export async function fetchToCache(
 
   try {
     armStall();
+
     const response = await fetch(uri, {
       headers: range ? { Range: range } : {},
       signal: anyAbortSignal(signals),
       priority: 'low',
     });
+
     if (!response.ok || !response.body) {
       void response.body?.cancel();
       throw new Error(`Segment prefetch failed with ${response.status}`);
     }
 
-    await cache.put(
+    await segmentCache.put(
       key,
-      new Response(
+      entry,
+      await new Response(
         response.body.pipeThrough(
           new TransformStream({
             transform(chunk, stream) {
@@ -50,20 +52,9 @@ export async function fetchToCache(
             },
           }),
         ),
-      ),
+      ).blob(),
     );
   } finally {
     clearTimeout(stallTimer);
   }
-}
-
-export async function hasQuota() {
-  const { usage = 0, quota = Infinity } = await navigator.storage
-    .estimate()
-    .catch((): StorageEstimate => ({}));
-  return !(usage > quota * QUOTA_USAGE_LIMIT);
-}
-
-export function isQuotaExceeded(error: unknown) {
-  return error instanceof DOMException && error.name === 'QuotaExceededError';
 }
