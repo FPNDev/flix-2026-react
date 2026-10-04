@@ -18,7 +18,7 @@ async function readCached(store: SegmentCache, key: string) {
     const cached = await cache.match(key);
     return await cached?.arrayBuffer();
   } catch {
-    return null;
+    // nothing
   }
 }
 
@@ -55,7 +55,7 @@ export const cachePlugin: shaka.extern.SchemePlugin = (
     shaka.extern.IAbortableOperation<shaka.extern.Response>
   >;
 
-  const promise = (async (): Promise<shaka.extern.Response> => {
+  const cachedOrFetched = async (): Promise<shaka.extern.Response> => {
     const data = await readCached(store, key);
 
     if (aborted) {
@@ -82,10 +82,11 @@ export const cachePlugin: shaka.extern.SchemePlugin = (
 
     store.remove(key);
     networkOperation = fetchNetwork();
-    return networkOperation.promise;
-  })();
 
-  return new shaka.util.AbortableOperation(promise, () => {
+    return networkOperation.promise;
+  };
+
+  return new shaka.util.AbortableOperation(cachedOrFetched(), () => {
     aborted = true;
     return networkOperation?.abort() ?? Promise.resolve();
   });
@@ -96,6 +97,7 @@ export function createCacheResponseFilter(
 ): shaka.extern.ResponseFilter {
   return (_type, response, context) => {
     const { type, stream, segment } = context ?? {};
+
     if (
       type !== shaka.net.NetworkingEngine.AdvancedRequestType.MEDIA_SEGMENT ||
       !stream ||
@@ -110,6 +112,7 @@ export function createCacheResponseFilter(
       response.originalUri,
       response.originalRequest.headers.Range,
     );
+
     const entry = {
       streamId: stream.id,
       startTime: segment.getStartTime(),

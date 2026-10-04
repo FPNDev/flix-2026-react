@@ -1,5 +1,9 @@
 import { useState, type PropsWithChildren } from 'react';
-import { PlayerActionsContext, PlayerStateContext } from './PlayerContext';
+import {
+  PlayerActionsContext,
+  PlayerSeekingContext,
+  PlayerStateContext,
+} from './PlayerContext';
 import { usePlayerSession } from '../hooks/usePlayerSession';
 
 export function PlayerProvider({ children }: PropsWithChildren) {
@@ -10,17 +14,20 @@ export function PlayerProvider({ children }: PropsWithChildren) {
     player,
     isLoading,
     activeURI,
+    targetTime,
     videoTrack,
     audioTracks,
     textTracks,
     selectedAudioTrackIndex,
     selectedTextTrackIndex,
+    playFromURL,
+    seekBy,
+    seekTo,
     selectAudioTrack,
     selectTextTrack,
     navigateAudioTracks,
     navigateTextTracks,
     disableTextTrack,
-    playFromURL,
   } = usePlayerSession({ video });
 
   const focusPlayer = () => {
@@ -37,12 +44,14 @@ export function PlayerProvider({ children }: PropsWithChildren) {
         setPlayerContainer,
         setVideo,
         focusPlayer,
+        playFromURL,
+        seekBy,
+        seekTo,
         selectAudioTrack,
         selectTextTrack,
         navigateAudioTracks,
         navigateTextTracks,
         disableTextTrack,
-        playFromURL,
       }}
     >
       <PlayerStateContext
@@ -59,7 +68,9 @@ export function PlayerProvider({ children }: PropsWithChildren) {
           selectedTextTrackIndex,
         }}
       >
-        {children}
+        <PlayerSeekingContext value={{ targetTime }}>
+          {children}
+        </PlayerSeekingContext>
       </PlayerStateContext>
     </PlayerActionsContext>
   );

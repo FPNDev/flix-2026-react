@@ -36,6 +36,14 @@ export function usePlayerControlKeys() {
       return;
     }
 
+    // TEMP: Remove with controls removed
+    video.addEventListener('keydown', (event) => {
+      const { code } = event;
+      if (code === 'ArrowLeft' || code === 'ArrowRight' || code === 'Space') {
+        event.preventDefault();
+      }
+    });
+
     return addExclusiveKeyUpListener(playerContainer, onKeyUp);
   }, [video, playerContainer]);
 }

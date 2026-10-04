@@ -110,12 +110,21 @@ export function useShakaPlayer({ video }: Props) {
       return loaded;
     } catch (err) {
       setIsLoading(false);
-
-      addToast({
-        icon: 'play_disabled',
-        text: isRemuxerError(err) ? err.error : 'Failed loading specified link',
-        variant: 'danger',
-      });
+      if (err instanceof shaka.util.Error && err.code === 4032) {
+        addToast({
+          icon: 'play_disabled',
+          text: 'Video codec is not supported by your browser',
+          variant: 'danger',
+        });
+      } else {
+        addToast({
+          icon: 'play_disabled',
+          text: isRemuxerError(err)
+            ? err.error
+            : 'Failed loading specified link',
+          variant: 'danger',
+        });
+      }
     }
 
     return false;

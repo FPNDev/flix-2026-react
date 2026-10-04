@@ -39,7 +39,12 @@ export function findBestMatchForTrack<T extends keyof TrackType>(
   let bestPrimaryScore = -1;
   let bestPrimaryTrackIndex;
 
-  const { primary, fields } = TRACK_COMPARE_FIELDS[trackType];
+  const compareBy = TRACK_COMPARE_FIELDS[trackType];
+  if (!compareBy) {
+    return;
+  }
+
+  const { primary, fields } = compareBy;
 
   for (const [index, track] of tracks.entries()) {
     const trackScore = fields.reduce(
@@ -68,4 +73,40 @@ export function findBestMatchForTrack<T extends keyof TrackType>(
   }
 
   return bestPrimaryScore === -1 ? bestTrackIndex : bestPrimaryTrackIndex;
+}
+
+export function selectTrack<T extends keyof TrackType>(
+  player: shaka.Player,
+  trackType: T,
+  track: TrackType[T],
+  bufferDuration?: number,
+) {
+  const selectors: {
+    [K in keyof TrackType]: (
+      newTrack: TrackType[K],
+      bufferDuration?: number,
+    ) => void;
+  } = {
+    VideoTrack: (videoTrack) => {
+      player.selectVideoTrack(videoTrack);
+    },
+    AudioTrack: (audioTrack, bufferDuration) => {
+      player.selectAudioTrack(audioTrack, bufferDuration);
+    },
+    TextTrack: (textTrack) => {
+      player.selectTextTrack(textTrack);
+    },
+  };
+
+  selectors[trackType](track, bufferDuration);
+}
+
+export function disableTrack(player: shaka.Player, trackType: keyof TrackType) {
+  switch (trackType) {
+    case 'VideoTrack':
+    case 'AudioTrack':
+      throw new Error('Cannot deselect video / audio tracks');
+    case 'TextTrack':
+      player.selectTextTrack(null);
+  }
 }

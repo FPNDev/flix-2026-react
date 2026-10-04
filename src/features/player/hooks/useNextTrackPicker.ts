@@ -2,24 +2,23 @@ import { useEffect, useEffectEvent, useRef } from 'react';
 import type shaka from 'shaka-player';
 import { useEventEffect } from '@/hooks/useEventEffect';
 import type { TrackType } from '../types/player.types';
-import { findBestMatchForTrack } from '../utils/tracks';
+import {
+  disableTrack,
+  findBestMatchForTrack,
+  selectTrack,
+} from '../utils/tracks';
+import { getTracks } from '../utils/shaka';
 
 type Props<T extends keyof TrackType> = {
   player: shaka.Player | undefined;
-  tracks: TrackType[T][];
   assetId: string;
-  selectedTrackIndex: number | undefined;
-  selectTrack: (trackIndex: number) => void;
   trackType: T;
   defaultIndex: number | undefined;
 };
 
 export function useNextTrackPicker<T extends keyof TrackType>({
   player,
-  tracks,
   assetId,
-  selectedTrackIndex,
-  selectTrack,
   trackType,
   defaultIndex,
 }: Props<T>) {
@@ -29,13 +28,15 @@ export function useNextTrackPicker<T extends keyof TrackType>({
     lastTrackRef.current = null;
   }, [assetId]);
 
-  const selectDefault = useEffectEvent(() => {
-    selectTrack(defaultIndex as number);
-  });
-  const selectBestTrack = useEffectEvent(selectTrack);
+  const selectBestTrack = useEffectEvent(() => {
+    if (!player) {
+      return;
+    }
 
-  useEffect(() => {
-    if (player && tracks.length > 0) {
+    const tracks = getTracks<T>(player, trackType);
+    if (tracks.length > 0) {
+      let bestIndex = defaultIndex;
+
       if (lastTrackRef.current) {
         const bestTrackIndex = findBestMatchForTrack(
           trackType,
@@ -44,24 +45,47 @@ export function useNextTrackPicker<T extends keyof TrackType>({
         );
 
         if (bestTrackIndex !== undefined) {
-          selectBestTrack(bestTrackIndex);
-          return;
+          bestIndex = bestTrackIndex;
         }
       }
-      selectDefault();
+
+      if (bestIndex === undefined) {
+        disableTrack(player, trackType);
+      } else {
+        selectTrack(player, trackType, tracks[bestIndex]);
+      }
     }
-  }, [player, tracks, trackType]);
+  });
+
+  const pickNewBest = useEffectEvent(() => {
+    if (!player) {
+      return;
+    }
+
+    const tracks = getTracks<T>(player, trackType);
+    const trackIndex = tracks.findIndex((track) => track.active);
+
+    if (trackIndex === -1) {
+      lastTrackRef.current = null;
+      return;
+    }
+
+    lastTrackRef.current = tracks[trackIndex];
+  });
 
   useEffect(() => {
-    if (tracks.length === 0) {
+    if (!player) {
       return;
     }
 
-    if (selectedTrackIndex !== undefined) {
-      lastTrackRef.current = tracks[selectedTrackIndex];
-      return;
-    }
+    player.addEventListener('loaded', selectBestTrack);
+    player.addEventListener('textchanged', pickNewBest);
+    player.addEventListener('variantchanged', pickNewBest);
 
-    lastTrackRef.current = null;
-  }, [tracks, selectedTrackIndex]);
+    return () => {
+      player.removeEventListener('loaded', selectBestTrack);
+      player.removeEventListener('textchanged', pickNewBest);
+      player.removeEventListener('variantchanged', pickNewBest);
+    };
+  }, [player]);
 }

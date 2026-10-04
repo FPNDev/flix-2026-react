@@ -1,10 +1,10 @@
 import { useToast } from '@/components/DesignSystem/Toast';
 import type shaka from 'shaka-player';
 import { usePlayerSubscription } from './usePlayerSubscription';
-import { useState } from 'react';
-import { isShakaActive } from '../utils/shaka';
+import { getTracks, isShakaActive } from '../utils/shaka';
 import type { TrackType } from '../types/player.types';
 import { TRACK_SELECTION_TOASTS } from '../constants/trackSelection';
+import { disableTrack, selectTrack } from '../utils/tracks';
 
 type Props<T extends keyof TrackType> = {
   player: shaka.Player | undefined;
@@ -14,52 +14,13 @@ type Props<T extends keyof TrackType> = {
 
 type SelectedIndex<T> = T extends 'TextTrack' ? number | undefined : number;
 
-const TRACKS_EVENTS = ['loaded', 'unloading'];
-const NO_TRACKS: unknown[] = [];
+type TrackStore<T> = {
+  tracks: T[];
+  selectedTrackIndex: SelectedIndex<T>;
+};
 
-function getTracks<T extends keyof TrackType>(
-  player: shaka.Player,
-  trackType: T,
-): TrackType[T][] {
-  switch (trackType) {
-    case 'AudioTrack':
-      return player.getAudioTracks() as TrackType[T][];
-    case 'TextTrack':
-      return player.getTextTracks() as TrackType[T][];
-  }
-}
-
-function selectTrack<T extends keyof TrackType>(
-  player: shaka.Player,
-  trackType: T,
-  track: TrackType[T],
-  bufferDuration?: number,
-) {
-  const selectors: {
-    [K in keyof TrackType]: (
-      newTrack: TrackType[K],
-      bufferDuration?: number,
-    ) => void;
-  } = {
-    AudioTrack: (audioTrack, bufferDuration) => {
-      player.selectAudioTrack(audioTrack, bufferDuration);
-    },
-    TextTrack: (track) => {
-      player.selectTextTrack(track);
-    },
-  };
-
-  selectors[trackType](track, bufferDuration);
-}
-
-function disableTrack(player: shaka.Player, trackType: keyof TrackType) {
-  switch (trackType) {
-    case 'AudioTrack':
-      throw new Error('Cannot deselect audio tracks');
-    case 'TextTrack':
-      player.selectTextTrack(null);
-  }
-}
+const TRACKS_EVENTS = ['loaded', 'unloading', 'variantchanged', 'textchanged'];
+const NO_TRACKS: TrackStore<unknown> = { tracks: [], selectedTrackIndex: 0 };
 
 /**
  * Provides a layer for tracks selection within Shaka player
@@ -77,19 +38,26 @@ export function useTrackSelection<T extends keyof TrackType>({
 
   const selector = () => {
     if (!player || !isShakaActive(player)) {
-      return NO_TRACKS as TrackType[T][];
+      return NO_TRACKS as TrackStore<TrackType[T]>;
     }
 
-    return getTracks<T>(player, trackType);
+    const tracks = getTracks<T>(player, trackType);
+    const index = tracks.findIndex((track) => track.active);
+
+    return {
+      tracks,
+      selectedTrackIndex: index === -1 ? defaultIndex : index,
+    } as TrackStore<TrackType[T]>;
   };
-  const { snapshot: tracks } = usePlayerSubscription<TrackType[T][]>({
+
+  const {
+    snapshot: { tracks, selectedTrackIndex },
+  } = usePlayerSubscription({
     player,
     events: TRACKS_EVENTS,
     selector,
-    fallback: NO_TRACKS as TrackType[T][],
+    fallback: NO_TRACKS as TrackStore<TrackType[T]>,
   });
-
-  const [selectedTrackIndex, setSelectedTrackIndex] = useState(defaultIndex);
 
   const select = (selectedIndex: SelectedIndex<T>, showToast = false) => {
     if (!player || tracks.length === 0) {
@@ -114,7 +82,7 @@ export function useTrackSelection<T extends keyof TrackType>({
             });
           }
         }
-      : null;
+      : () => {};
 
     try {
       if (newTrack) {
@@ -123,15 +91,9 @@ export function useTrackSelection<T extends keyof TrackType>({
         disableTrack(player, trackType);
       }
 
-      setSelectedTrackIndex(selectedIndex as typeof defaultIndex);
-
-      if (displayToast) {
-        displayToast();
-      }
+      displayToast();
     } catch {
-      if (displayToast) {
-        displayToast(true);
-      }
+      displayToast(true);
     }
   };
 

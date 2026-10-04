@@ -90,9 +90,7 @@ export const PLAYER_CONTROL_KEYS: KeyActions = {
     }
   },
   Space: ({ event, state: { video } }) => {
-    if (event.target === video) {
-      return;
-    }
+    event.preventDefault();
 
     if (
       video.paused &&
@@ -104,17 +102,13 @@ export const PLAYER_CONTROL_KEYS: KeyActions = {
       video.pause();
     }
   },
-  ArrowLeft: ({ state: { video }, event }) => {
-    if (event.target === video) {
-      return;
-    }
-    video.currentTime -= SEEK_STEP;
+  ArrowLeft: ({ actions, event }) => {
+    event.preventDefault();
+    actions.seekBy(-SEEK_STEP);
   },
-  ArrowRight: ({ state: { video }, event }) => {
-    if (event.target === video) {
-      return;
-    }
-    video.currentTime += SEEK_STEP;
+  ArrowRight: ({ actions, event }) => {
+    event.preventDefault();
+    actions.seekBy(SEEK_STEP);
   },
   Comma: ({ state: { video }, frameRate }) => {
     seekFrameByFrame({ video, frameRate, direction: -1 });

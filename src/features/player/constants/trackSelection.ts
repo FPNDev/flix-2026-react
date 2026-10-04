@@ -3,7 +3,7 @@ import type { TrackType } from '../types/player.types';
 import { getTrackDisplayName } from '../utils/tracks';
 
 type MessageGroup = {
-  [key in keyof TrackType]: (track: TrackType[key]) => ToastInfo;
+  [key in keyof TrackType]?: (track: TrackType[key]) => ToastInfo;
 };
 
 type DisabledMessageGroup = {

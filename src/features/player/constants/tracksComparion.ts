@@ -1,7 +1,7 @@
 import type { TrackType } from '../types/player.types';
 
 type CompareFields = {
-  [key in keyof TrackType]: {
+  [key in keyof TrackType]?: {
     primary: keyof TrackType[key];
     fields: (keyof TrackType[key])[];
   };

@@ -2,6 +2,7 @@ import { useShakaPlayer } from './useShakaPlayer';
 import { useTrackSelection } from './useTrackSelection';
 import { useNextTrackPicker } from './useNextTrackPicker';
 import { useVideoTrack } from './useVideoTrack';
+import { useSeeking } from './useSeeking';
 
 type Props = {
   video: HTMLVideoElement | undefined;
@@ -45,38 +46,37 @@ export function usePlayerSession({ video }: Props) {
 
   useNextTrackPicker({
     trackType: 'AudioTrack',
-    tracks: audioTracks,
     assetId,
     player,
-    selectedTrackIndex: selectedAudioTrackIndex,
-    selectTrack: selectAudioTrack,
     defaultIndex: 0,
   });
 
   useNextTrackPicker({
     trackType: 'TextTrack',
-    tracks: textTracks,
     assetId,
     player,
-    selectedTrackIndex: selectedTextTrackIndex,
-    selectTrack: selectTextTrack,
     defaultIndex: undefined,
   });
+
+  const { seekTo, seekBy, targetTime } = useSeeking({ video });
 
   return {
     player,
     isLoading,
     activeURI,
+    targetTime,
     videoTrack,
     audioTracks,
     textTracks,
     selectedAudioTrackIndex,
     selectedTextTrackIndex,
+    playFromURL,
+    seekBy,
+    seekTo,
     selectAudioTrack,
     selectTextTrack,
     navigateAudioTracks,
     navigateTextTracks,
     disableTextTrack,
-    playFromURL,
   };
 }

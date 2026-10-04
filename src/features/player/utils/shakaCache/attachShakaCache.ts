@@ -43,7 +43,7 @@ export function attachShakaCache(
 ) {
   const networkingEngine = player.getNetworkingEngine();
   if (!networkingEngine || !('caches' in window)) {
-    return () => null;
+    return () => {};
   }
 
   const reportBufferedRanges = () => {
@@ -84,10 +84,11 @@ export function attachShakaCache(
     player.addEventListener(event, reposition);
     player.addEventListener(event, reportBufferedRanges);
   }
+
   player.addEventListener('segmentappended', wake);
   player.addEventListener('segmentappended', reportBufferedRanges);
-  player.addEventListener('unloading', stop);
   video.addEventListener('seeking', reposition);
+  player.addEventListener('unloading', stop);
   window.addEventListener('pagehide', onPageHide);
 
   const releaseLock = holdCacheLock(cacheName);
