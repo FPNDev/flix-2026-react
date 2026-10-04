@@ -3,6 +3,7 @@ import { useTrackSelection } from './useTrackSelection';
 import { useNextTrackPicker } from './useNextTrackPicker';
 import { useVideoTrack } from './useVideoTrack';
 import { useSeeking } from './useSeeking';
+import { REMUXER_SOURCE_PARAM } from '../api/playerApi';
 
 type Props = {
   video: HTMLVideoElement | undefined;
@@ -17,7 +18,7 @@ export function usePlayerSession({ video }: Props) {
   });
 
   const assetId = activeURI
-    ? (new URL(activeURI).searchParams.get('source') ?? '')
+    ? (new URL(activeURI).searchParams.get(REMUXER_SOURCE_PARAM) ?? '')
     : '';
 
   const videoTrack = useVideoTrack({ player });

@@ -6,7 +6,7 @@ import { usePlayerActions, usePlayerState } from '../../context/PlayerContext';
 import { isShakaActive } from '../../utils/shaka';
 import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { TrackSelectors } from '../TrackSelectors';
-import { remuxerURI } from '../../api/playerApi';
+import { remuxerURI, REMUXER_SOURCE_PARAM } from '../../api/playerApi';
 import {
   useMediaFileActions,
   useMediaFiles,
@@ -17,7 +17,7 @@ import { useMediaSessionMetadata } from '../../hooks/useMediaSessionMetadata';
 
 const getManifestURL = (sourceURI: string, fileIndex: number) => {
   return remuxerURI('m3u8', {
-    source: sourceURI,
+    [REMUXER_SOURCE_PARAM]: sourceURI,
     file: fileIndex,
   });
 };

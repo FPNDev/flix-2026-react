@@ -3,6 +3,12 @@ import type { FilesResponse } from '../types/mediaFiles.types';
 import { isAbortError } from '@/utils/abort';
 
 /**
+ * Query param the remuxer reads the media source from
+ */
+export const REMUXER_SOURCE_PARAM =
+  (import.meta.env.VITE_REMUXER_SOURCE_PARAM as string | undefined) ?? 'source';
+
+/**
  * Generates a URL to media remuxer endpoint
  */
 export function remuxerURI(
@@ -28,7 +34,7 @@ export function remuxerURI(
 
 async function fetchMediaFiles<T>(sourceURI: string, signal?: AbortSignal) {
   const response = await fetch(
-    remuxerURI('files', { source: sourceURI }),
+    remuxerURI('files', { [REMUXER_SOURCE_PARAM]: sourceURI }),
     {
       signal,
     },
