@@ -5,11 +5,8 @@ Work in progress
 Solved:
 
 - [x] Integrate Shaka
-- [x] Integrate player with media remuxer
 - [x] Add hooks for tracks switching
 - [x] Add basic hotkeys and basic subtitle / audio track control
-- [x] Split source logic from player -
-      it shall be pure HLS, form handles source
 
 Next steps:
 
@@ -29,8 +26,7 @@ Plan afterwards:
 - [ ] Main layout - navigation, search bar, grids
 - [ ] Main page - hot releases, recommendations etc
 - [ ] Search & search filters
-- [ ] Advanced player UI - quality picker,
-      UDP scrape for stats (location to be decided)
+- [ ] Advanced player UI - quality picker, sound picker
   - [ ] Remote progress restoration
   - [ ] Advanced hotkeys for Player UI
   - [ ] Offline downloads and offline support
