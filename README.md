@@ -36,4 +36,4 @@ Plan afterwards:
 Possibly (undecided) - separate repos to be created and referenced:
 
 - [ ] Desktop app / mobile app via Electron/CapacitorJS
-- [ ] SmartTV app - WebGL renderer, deterministic over reactive
+- [ ] SmartTV app - WebGL renderer, deterministic over reactive - use LWN when done
