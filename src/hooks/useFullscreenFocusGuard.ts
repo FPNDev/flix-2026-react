@@ -8,6 +8,7 @@ export const useFullscreenFocusGuard = () => {
         (fsElement as HTMLElement).focus();
       }
     };
+
     window.addEventListener('focusout', handleFocusOut, { capture: true });
 
     return () => {

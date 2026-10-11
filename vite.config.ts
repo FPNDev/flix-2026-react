@@ -56,6 +56,11 @@ export default defineConfig(({ mode }) => {
                 priority: 3,
               },
               {
+                name: 'hlsjs-vendor',
+                test: /node_modules[\\/]hls\.js/u,
+                priority: 2,
+              },
+              {
                 name: 'common',
                 minShareCount: 2,
                 minSize: 10000,

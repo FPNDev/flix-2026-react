@@ -1,4 +1,10 @@
-function requestFullscreen(element: Element) {
+const FULLSCREEN_EVENTS = [
+  'fullscreenchange',
+  'webkitfullscreenchange',
+  'MSFullscreenChange',
+];
+
+export function requestFullscreen(element: Element) {
   if (element.requestFullscreen) {
     return element.requestFullscreen();
   } else if (element.webkitRequestFullscreen) {
@@ -8,7 +14,7 @@ function requestFullscreen(element: Element) {
   }
 }
 
-function exitFullscreen(element?: Element) {
+export function exitFullscreen(element?: Element) {
   if (element?.webkitExitFullscreen) {
     return element.webkitExitFullscreen();
   }
@@ -40,4 +46,18 @@ function isFullscreen(element?: Element) {
   const fullscreenElement = getFullscreenElement();
 
   return element ? fullscreenElement === element : !!fullscreenElement;
+}
+
+export function subscribeFullscreen(
+  onFullscreenChange: (event: Event) => void,
+) {
+  for (const eventName of FULLSCREEN_EVENTS) {
+    document.addEventListener(eventName, onFullscreenChange);
+  }
+
+  return () => {
+    for (const eventName of FULLSCREEN_EVENTS) {
+      document.removeEventListener(eventName, onFullscreenChange);
+    }
+  };
 }
