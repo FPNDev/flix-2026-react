@@ -1,11 +1,11 @@
 import { GiB } from '@/constants/filesize';
 import { Row } from '@/components/DesignSystem/Layout';
 import { usePlayerActions, usePlayerState } from '../context/PlayerContext';
-import { addKeys } from '@/utils/list';
 import {
   useMediaFileActions,
   useMediaFiles,
 } from '../context/MediaFilesContext';
+import { getTrackDisplayName } from '../utils/tracks';
 
 export function TrackSelectors() {
   const { audioTracks, selectedAudioTrackIndex } = usePlayerState();
@@ -17,7 +17,7 @@ export function TrackSelectors() {
   const onAudioTrackIndexChanged = (
     ev: React.ChangeEvent<HTMLSelectElement>,
   ) => {
-    selectAudioTrack(+ev.target.value, true);
+    selectAudioTrack(+ev.target.value);
     focusPlayer();
   };
 
@@ -25,11 +25,6 @@ export function TrackSelectors() {
     selectFile(+ev.target.value);
     focusPlayer();
   };
-
-  const tracksWithKeys = addKeys(
-    audioTracks,
-    (track) => `${track.id ?? track.language}-${track.label}`,
-  );
 
   return (
     <Row spacing={2} equal>
@@ -52,9 +47,9 @@ export function TrackSelectors() {
         onChange={onAudioTrackIndexChanged}
       >
         <option hidden>Select Audio Track</option>
-        {tracksWithKeys.map((audioTrack, index) => (
-          <option key={audioTrack.key} value={index}>
-            {audioTrack.label} - {audioTrack.language}
+        {audioTracks.map((track, index) => (
+          <option key={track.id} value={index}>
+            {getTrackDisplayName(track)}
           </option>
         ))}
       </select>

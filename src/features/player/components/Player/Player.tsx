@@ -1,26 +1,15 @@
 import classes from './Player.module.scss';
 import { useFullscreenFocusGuard } from '@/hooks/useFullscreenFocusGuard';
+import { usePlayerActions } from '../../context/PlayerContext';
 import { usePlayerControlKeys } from '../../hooks/usePlayerControlKeys';
-import { useAutoplayNextEpisode } from '../../hooks/useAutoplayNextEpisode';
-import { usePlayerActions, usePlayerState } from '../../context/PlayerContext';
-import { useMediaFileActions } from '../../context/MediaFilesContext';
 
 export function Player() {
-  const { video } = usePlayerState();
-  const { setVideo, setPlayerContainer } = usePlayerActions();
-  const { navigateFiles } = useMediaFileActions();
+  const { attachVideo, setPlayerContainer } = usePlayerActions();
 
-  const onVideoRef = (newVideo: HTMLVideoElement | null) => {
-    setVideo(newVideo ?? undefined);
-  };
   const onPlayerContainerRef = (newPlayerContainer: HTMLElement | null) => {
     setPlayerContainer(newPlayerContainer ?? undefined);
   };
 
-  useAutoplayNextEpisode({
-    video,
-    navigateFiles,
-  });
   usePlayerControlKeys();
   useFullscreenFocusGuard();
 
@@ -30,9 +19,7 @@ export function Player() {
       ref={onPlayerContainerRef}
       tabIndex={-1}
     >
-      <video className={classes.video} ref={onVideoRef} controls playsInline />
+      <video className={classes.video} ref={attachVideo} controls playsInline />
     </div>
   );
 }
-
-export default Player;

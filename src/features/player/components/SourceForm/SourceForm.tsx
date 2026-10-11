@@ -3,17 +3,19 @@ import classes from './SourceForm.module.scss';
 import { Icon } from '@/components/DesignSystem/Icon';
 import { useToast } from '@/components/DesignSystem/Toast';
 import { usePlayerActions, usePlayerState } from '../../context/PlayerContext';
-import { isShakaActive } from '../../utils/shaka';
 import { useEffect, useEffectEvent, useRef, useState } from 'react';
-import { TrackSelectors } from '../TrackSelectors';
-import { remuxerURI, REMUXER_SOURCE_PARAM } from '../../api/playerApi';
+import {
+  fetchPlayableFiles,
+  remuxerURI,
+  REMUXER_SOURCE_PARAM,
+} from '../../api/remuxer';
 import {
   useMediaFileActions,
   useMediaFiles,
 } from '../../context/MediaFilesContext';
 import { renewAbortController } from '@/utils/abort';
-import { fetchPlayableFiles } from '../../api/playerApi';
-import { useMediaSessionMetadata } from '../../hooks/useMediaSessionMetadata';
+import { TrackSelectors } from '../TrackSelectors';
+import { VideoError } from '../../sdk';
 
 const getManifestURL = (sourceURI: string, fileIndex: number) => {
   return remuxerURI('m3u8', {
@@ -24,15 +26,14 @@ const getManifestURL = (sourceURI: string, fileIndex: number) => {
 
 export function SourceForm() {
   const { addToast } = useToast();
-  const { playFromURL, focusPlayer } = usePlayerActions();
-  const { player, isLoading, videoTrack } = usePlayerState();
+  const { load, focusPlayer } = usePlayerActions();
+  const { isLoading } = usePlayerState();
 
   const { files, selectedFileIndex } = useMediaFiles();
   const { setFiles } = useMediaFileActions();
 
   const sourceInputRef = useRef<HTMLInputElement>(null);
   const [sourceURI, setSourceURI] = useState('');
-  const [isLoadingFiles, setIsLoadingFiles] = useState(false);
   const abortRef = useRef<AbortController>(null);
 
   const submitForm = async (ev: React.SubmitEvent) => {
@@ -46,42 +47,28 @@ export function SourceForm() {
     focusPlayer();
 
     const urlToPlay = sourceInput.value;
-    const fileName =
-      files.length > 0 ? files[selectedFileIndex].name : sourceURI;
-    if (
-      urlToPlay &&
-      sourceURI === urlToPlay &&
-      (isLoading || isLoadingFiles || isShakaActive(player))
-    ) {
+    if (urlToPlay === sourceURI && (isLoading || files.length > 0)) {
       addToast({
         icon: 'playlist_remove',
-        text: `Already playing ` + fileName,
+        text:
+          `Already playing ` + (files[selectedFileIndex]?.name ?? sourceURI),
         variant: 'danger',
       });
 
       return;
     }
 
-    const indexingDebounced = setTimeout(() => {
-      addToast({
-        icon: 'playlist_play',
-        text: `Indexing ${urlToPlay}`,
-        variant: 'success',
-      });
-    }, 500);
-
     setSourceURI(urlToPlay);
     setFiles([]);
-    setIsLoadingFiles(true);
 
     try {
       const files = await fetchPlayableFiles(
         urlToPlay,
         renewAbortController(abortRef).signal,
       );
+
       if (files) {
         setFiles(files);
-        setIsLoadingFiles(false);
       }
     } catch (err) {
       if (err instanceof Error) {
@@ -91,36 +78,33 @@ export function SourceForm() {
           variant: 'danger',
         });
       }
-      setIsLoadingFiles(false);
     }
-
-    clearTimeout(indexingDebounced);
   };
 
   const playSelectedFile = useEffectEvent(async (url: string) => {
     const file = files[selectedFileIndex];
 
-    let loadingDebounced: number;
-    if (file) {
-      loadingDebounced = setTimeout(() => {
+    try {
+      await load(url);
+
+      if (file) {
         addToast({
           icon: 'playlist_play',
-          text: `Loading file: ${file.name}`,
+          text: `Playing ` + file.name,
           variant: 'success',
         });
-      }, 500);
-      focusPlayer();
-    }
-
-    const played = await playFromURL(url);
-    clearTimeout(loadingDebounced!);
-
-    if (played && file) {
-      addToast({
-        icon: 'playlist_play',
-        text: `Playing ` + file.name,
-        variant: 'success',
-      });
+      }
+    } catch (err) {
+      if (file && err !== VideoError.Interrupted) {
+        addToast({
+          icon: 'play_disabled',
+          text:
+            err === VideoError.UnsupportedCodec
+              ? 'Video codec is not supported by your browser'
+              : `Cannot play ` + file.name,
+          variant: 'danger',
+        });
+      }
     }
   });
 
@@ -130,13 +114,10 @@ export function SourceForm() {
       : '';
 
   useEffect(() => {
-    void playSelectedFile(manifestURL);
+    if (manifestURL.length > 0) {
+      void playSelectedFile(manifestURL);
+    }
   }, [manifestURL]);
-
-  useMediaSessionMetadata({
-    currentFile: files[selectedFileIndex],
-    videoTrack,
-  });
 
   return (
     <form
@@ -156,5 +137,3 @@ export function SourceForm() {
     </form>
   );
 }
-
-export default SourceForm;

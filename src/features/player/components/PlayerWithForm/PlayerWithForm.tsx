@@ -1,7 +1,7 @@
 import classes from './PlayerWithForm.module.scss';
 import { MediaFilesProvider } from '../../context/MediaFilesProvider';
-import PlayerProvider from '../../context/PlayerProvider';
-import Player from '../Player/Player';
+import { PlayerProvider } from '../../context/PlayerProvider';
+import { Player } from '../Player';
 import { SourceForm } from '../SourceForm';
 
 export function PlayerWithForm() {

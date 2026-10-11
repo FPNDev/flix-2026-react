@@ -1,8 +1,7 @@
-import { PLAYER_CONTROL_KEYS } from '@/features/player/constants/playerControlKeys';
-import { addExclusiveKeyUpListener } from '@/utils/keyboard';
 import { useEffect, useEffectEvent } from 'react';
-import { usePlayerActions, usePlayerState } from '../context/PlayerContext';
-import { useMediaFileActions } from '../context/MediaFilesContext';
+import { usePlayerActions, usePlayerState } from '../../context/PlayerContext';
+import { useMediaFileActions } from '../../context/MediaFilesContext';
+import { PLAYER_CONTROL_KEYS } from './keyHandlers';
 /**
  * Binds hotkeys to different player controls
  */
@@ -11,13 +10,14 @@ export function usePlayerControlKeys() {
   const actions = usePlayerActions();
   const fileActions = useMediaFileActions();
 
-  const { video, playerContainer } = state;
+  const { video, playerContainer, level } = state;
 
-  const onKeyUp = useEffectEvent((ev: KeyboardEvent) => {
+  const onKeyDown = useEffectEvent((ev: KeyboardEvent) => {
     const { code } = ev;
 
     if (code in PLAYER_CONTROL_KEYS) {
       ev.preventDefault();
+
       return PLAYER_CONTROL_KEYS[code]({
         state: state as typeof state & {
           video: NonNullable<typeof state.video>;
@@ -25,7 +25,7 @@ export function usePlayerControlKeys() {
         },
         actions,
         fileActions,
-        frameRate: state.videoTrack?.frameRate ?? 0,
+        frameRate: level?.frameRate ?? 24,
         event: ev,
       });
     }
@@ -36,14 +36,10 @@ export function usePlayerControlKeys() {
       return;
     }
 
-    // TEMP: Remove with controls removed
-    video.addEventListener('keydown', (event) => {
-      const { code } = event;
-      if (code === 'ArrowLeft' || code === 'ArrowRight' || code === 'Space') {
-        event.preventDefault();
-      }
-    });
+    playerContainer.addEventListener('keydown', onKeyDown);
 
-    return addExclusiveKeyUpListener(playerContainer, onKeyUp);
+    return () => {
+      playerContainer.removeEventListener('keydown', onKeyDown);
+    };
   }, [video, playerContainer]);
 }

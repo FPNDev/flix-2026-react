@@ -1,24 +1,24 @@
 import { useEffect } from 'react';
-import type shaka from 'shaka-player';
 import { setMediaSessionMetadata } from '@/utils/mediaSession';
-import type { MediaFile } from '../types/mediaFiles.types';
 import { getTrackDisplayName } from '../utils/tracks';
+import type { MediaFile } from '../api/remuxer';
+import type { LevelInfo } from '../sdk';
 
 type Props = {
-  videoTrack: shaka.extern.VideoTrack | undefined;
+  level: LevelInfo | undefined;
   currentFile?: MediaFile;
 };
 
-export function useMediaSessionMetadata({ videoTrack, currentFile }: Props) {
+export function useMediaSessionMetadata({ level, currentFile }: Props) {
   useEffect(() => {
-    if (!videoTrack || !currentFile) {
+    if (!level || !currentFile) {
       setMediaSessionMetadata('FLIX');
 
       return;
     }
 
     setMediaSessionMetadata(
-      `${currentFile.name} - ${getTrackDisplayName(videoTrack)}`,
+      `${currentFile.name} - ${getTrackDisplayName(level)}`,
     );
-  }, [videoTrack, currentFile]);
+  }, [level, currentFile]);
 }

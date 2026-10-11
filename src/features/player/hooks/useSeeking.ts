@@ -91,6 +91,7 @@ export function useSeeking({ video, debounceBy = 150 }: Props) {
     video.addEventListener('seeking', cleanup);
 
     return () => {
+      cleanup();
       video.removeEventListener('seeking', cleanup);
     };
   }, [video, cleanup]);

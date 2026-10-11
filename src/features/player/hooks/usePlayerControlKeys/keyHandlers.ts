@@ -1,6 +1,6 @@
 import { toggleFullscreen } from '@/utils/fullscreen';
-import type { PlayerActions, PlayerState } from '../types/player.types';
-import type { MediaFileActions } from '../types/mediaFiles.types';
+import type { PlayerActions, PlayerState } from '../../context/PlayerContext';
+import type { MediaFileActions } from '../../context/MediaFilesContext';
 
 const SEEK_STEP = 5;
 
@@ -36,28 +36,36 @@ type ActionParams = {
   frameRate: number;
 };
 
-type KeyActions = Record<string, (params: ActionParams) => boolean | void>;
+type KeyActions = Record<string, (params: ActionParams) => unknown>;
 
 /**
  * Video player general stateless hotkeys (advanced stateful ones are part of usePlayerControlKeys directly)
  */
 export const PLAYER_CONTROL_KEYS: KeyActions = {
-  KeyF: ({ state: { playerContainer } }) => {
+  KeyF: ({ state: { playerContainer }, event: { repeat } }) => {
+    if (repeat) {
+      return;
+    }
+
     void toggleFullscreen(playerContainer);
   },
-  Enter: ({ state: { playerContainer } }) => {
+  Enter: ({ state: { playerContainer }, event: { repeat } }) => {
+    if (repeat) {
+      return;
+    }
+
     void toggleFullscreen(playerContainer);
   },
-  KeyC: ({ state, actions, event: { shiftKey, altKey } }) => {
-    if (state.textTracks.length === 0) {
+  KeyC: ({ state, actions, event: { shiftKey, altKey, repeat } }) => {
+    if (repeat || state.textTracks.length === 0) {
       return;
     }
 
     if (!shiftKey) {
-      if (state.selectedTextTrackIndex === undefined) {
-        actions.selectTextTrack(0, true);
+      if (state.selectedTextTrackIndex === -1) {
+        actions.selectTextTrack(0);
       } else {
-        actions.disableTextTrack(true);
+        actions.disableTextTrack();
       }
 
       return;
@@ -65,33 +73,35 @@ export const PLAYER_CONTROL_KEYS: KeyActions = {
 
     actions.navigateTextTracks(altKey ? -1 : 1);
   },
-  KeyA: ({ actions, event: { shiftKey } }) => {
+  KeyA: ({ actions, event: { shiftKey, repeat } }) => {
+    if (repeat) {
+      return;
+    }
+
     actions.navigateAudioTracks(shiftKey ? -1 : 1);
   },
-  KeyN: ({ fileActions, event: { shiftKey } }) => {
-    if (!shiftKey) {
+  KeyN: ({ fileActions, event: { shiftKey, repeat } }) => {
+    if (!shiftKey || repeat) {
       return;
     }
 
     fileActions.navigateFiles(1);
   },
-  KeyP: ({ fileActions, event: { shiftKey } }) => {
-    if (!shiftKey) {
+  KeyP: ({ fileActions, event: { shiftKey, repeat } }) => {
+    if (!shiftKey || repeat) {
       return;
     }
 
     fileActions.navigateFiles(-1);
   },
-  KeyM: ({ state: { video } }) => {
-    if (video.muted) {
-      video.muted = false;
-    } else {
-      video.muted = true;
+  KeyM: ({ state: { video }, event: { repeat } }) => {
+    if (repeat) {
+      return;
     }
-  },
-  Space: ({ event, state: { video } }) => {
-    event.preventDefault();
 
+    video.muted = !video.muted;
+  },
+  Space: ({ state: { video } }) => {
     if (
       video.paused &&
       video.duration &&
@@ -102,12 +112,10 @@ export const PLAYER_CONTROL_KEYS: KeyActions = {
       video.pause();
     }
   },
-  ArrowLeft: ({ actions, event }) => {
-    event.preventDefault();
+  ArrowLeft: ({ actions }) => {
     actions.seekBy(-SEEK_STEP);
   },
-  ArrowRight: ({ actions, event }) => {
-    event.preventDefault();
+  ArrowRight: ({ actions }) => {
     actions.seekBy(SEEK_STEP);
   },
   Comma: ({ state: { video }, frameRate }) => {
@@ -116,4 +124,4 @@ export const PLAYER_CONTROL_KEYS: KeyActions = {
   Period: ({ state: { video }, frameRate }) => {
     seekFrameByFrame({ video, frameRate, direction: 1 });
   },
-} as const;
+};

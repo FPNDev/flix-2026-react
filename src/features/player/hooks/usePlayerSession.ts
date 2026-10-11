@@ -1,77 +1,110 @@
-import { useShakaPlayer } from './useShakaPlayer';
-import { useTrackSelection } from './useTrackSelection';
-import { useNextTrackPicker } from './useNextTrackPicker';
-import { useVideoTrack } from './useVideoTrack';
+import { REMUXER_SOURCE_PARAM } from '../api/remuxer';
+import {
+  useMediaFileActions,
+  useMediaFiles,
+} from '../context/MediaFilesContext';
+import type {
+  PlayerActions,
+  PlayerSeeking,
+  PlayerState,
+} from '../context/PlayerContext';
+import { useAutoplayNextEpisode } from './useAutoplayNextEpisode';
+import { useMediaSessionMetadata } from './useMediaSessionMetadata';
+import { usePlayerSubscription } from './usePlayerSubscription';
+import { useRememberTrack } from './useRememberTrack';
 import { useSeeking } from './useSeeking';
-import { REMUXER_SOURCE_PARAM } from '../api/playerApi';
+import { useTrackSelection } from './useTrackSelection';
+import { useVideoSdk } from './useVideoSdk';
+import { useVideoStartup } from './useVideoStartup';
 
-type Props = {
-  video: HTMLVideoElement | undefined;
-};
+type PlayerSession = Omit<PlayerState, 'playerContainer'> &
+  Omit<PlayerActions, 'setPlayerContainer' | 'focusPlayer'> &
+  PlayerSeeking;
+
+const LEVEL_SELECTED_EVENTS = ['level:selected', 'unload'];
 
 /**
  * Composes the player hooks into a single playback session
  */
-export function usePlayerSession({ video }: Props) {
-  const { player, activeURI, playFromURL, isLoading } = useShakaPlayer({
-    video,
+export function usePlayerSession(): PlayerSession {
+  const { files, selectedFileIndex } = useMediaFiles();
+  const { navigateFiles } = useMediaFileActions();
+
+  const { player, attachVideo } = useVideoSdk();
+  const video = player?.video;
+
+  const { load, isLoading, activeURI } = useVideoStartup({
+    player,
+    autoPlay: true,
   });
+  const { seekBy, seekTo, targetTime } = useSeeking({ video });
 
   const assetId = activeURI
     ? (new URL(activeURI).searchParams.get(REMUXER_SOURCE_PARAM) ?? '')
     : '';
 
-  const videoTrack = useVideoTrack({ player });
-
   const {
     tracks: audioTracks,
     selectedTrackIndex: selectedAudioTrackIndex,
-    selectTrack: selectAudioTrack,
+    selectTrack: restoreAudioTrack,
+    selectTrackWithToast: selectAudioTrack,
     navigateTracks: navigateAudioTracks,
-  } = useTrackSelection({
-    player,
-    trackType: 'AudioTrack',
-    bufferDuration: 1,
-  });
+  } = useTrackSelection({ player, trackType: 'audio' });
 
   const {
     tracks: textTracks,
     selectedTrackIndex: selectedTextTrackIndex,
-    selectTrack: selectTextTrack,
+    selectTrack: restoreTextTrack,
+    selectTrackWithToast: selectTextTrack,
     navigateTracks: navigateTextTracks,
-    disableTrack: disableTextTrack,
-  } = useTrackSelection({
-    player,
-    trackType: 'TextTrack',
-  });
+    selectDefault: disableTextTrack,
+  } = useTrackSelection({ player, trackType: 'text' });
 
-  useNextTrackPicker({
-    trackType: 'AudioTrack',
+  useRememberTrack({
     assetId,
-    player,
-    defaultIndex: 0,
+    tracks: audioTracks,
+    selectedTrackIndex: selectedAudioTrackIndex,
+    selectTrack: restoreAudioTrack,
+    trackType: 'audio',
   });
 
-  useNextTrackPicker({
-    trackType: 'TextTrack',
+  useRememberTrack({
     assetId,
-    player,
-    defaultIndex: undefined,
+    tracks: textTracks,
+    selectedTrackIndex: selectedTextTrackIndex,
+    selectTrack: restoreTextTrack,
+    trackType: 'text',
   });
 
-  const { seekTo, seekBy, targetTime } = useSeeking({ video });
+  useAutoplayNextEpisode({ video, navigateFiles });
+
+  const { snapshot: level } = usePlayerSubscription({
+    player,
+    events: LEVEL_SELECTED_EVENTS,
+    selector: (hls, evt) => {
+      if (evt?.type === 'unload') {
+        return;
+      }
+
+      return hls.levels()[hls.level()];
+    },
+    fallback: undefined,
+  });
+
+  useMediaSessionMetadata({ level, currentFile: files[selectedFileIndex] });
 
   return {
+    video,
     player,
     isLoading,
-    activeURI,
     targetTime,
-    videoTrack,
+    level,
     audioTracks,
     textTracks,
     selectedAudioTrackIndex,
     selectedTextTrackIndex,
-    playFromURL,
+    attachVideo,
+    load,
     seekBy,
     seekTo,
     selectAudioTrack,

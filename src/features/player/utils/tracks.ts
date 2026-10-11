@@ -1,22 +1,44 @@
-import type shaka from 'shaka-player';
-import { TRACK_COMPARE_FIELDS } from '../constants/tracksComparion';
-import type { TrackType } from '../types/player.types';
 import { LANGUAGE_NAMES } from '@/constants/languageNames';
+import type { LevelInfo, TrackType } from '../sdk';
 
-export function getTrackDisplayName<
-  T extends TrackType[keyof TrackType] | shaka.extern.VideoTrack,
->(track: T, withLanguage = false) {
-  const trackLabel = track.label?.trim() ?? '';
+type CompareFields = {
+  [key in keyof TrackType]?: {
+    primary: keyof TrackType[key];
+    fields: (keyof TrackType[key])[];
+  };
+};
+
+const TRACK_COMPARE_FIELDS: CompareFields = {
+  audio: {
+    primary: 'lang',
+    fields: ['name', 'audioCodec', 'channels'],
+  },
+  text: {
+    primary: 'lang',
+    fields: ['forced', 'name'],
+  },
+};
+
+export function getTrackDisplayName(
+  track: TrackType[keyof TrackType] | LevelInfo,
+  withLanguage = false,
+) {
+  const trackLabel = track.name?.trim() ?? '';
 
   const parts = [];
   if (trackLabel) {
     parts.push(trackLabel);
   }
 
-  if ((withLanguage || parts.length === 0) && track.language !== 'und') {
+  if (
+    (withLanguage || parts.length === 0) &&
+    'lang' in track &&
+    track.lang &&
+    track.lang !== 'und'
+  ) {
     let languageName: string | undefined;
     try {
-      languageName = LANGUAGE_NAMES.of(track.language);
+      languageName = LANGUAGE_NAMES.of(track.lang);
       if (languageName && languageName !== trackLabel) {
         parts.push(languageName);
       }
@@ -49,9 +71,10 @@ export function findBestMatchForTrack<T extends keyof TrackType>(
   for (const [index, track] of tracks.entries()) {
     const trackScore = fields.reduce(
       (curScore, nextField) =>
-        curScore + +(track[nextField] === matchToTrack[nextField]),
+        curScore + Number(track[nextField] === matchToTrack[nextField]),
       0,
     );
+
     if (
       track[primary] === matchToTrack[primary] &&
       trackScore > bestPrimaryScore
@@ -73,40 +96,4 @@ export function findBestMatchForTrack<T extends keyof TrackType>(
   }
 
   return bestPrimaryScore === -1 ? bestTrackIndex : bestPrimaryTrackIndex;
-}
-
-export function selectTrack<T extends keyof TrackType>(
-  player: shaka.Player,
-  trackType: T,
-  track: TrackType[T],
-  bufferDuration?: number,
-) {
-  const selectors: {
-    [K in keyof TrackType]: (
-      newTrack: TrackType[K],
-      bufferDuration?: number,
-    ) => void;
-  } = {
-    VideoTrack: (videoTrack) => {
-      player.selectVideoTrack(videoTrack);
-    },
-    AudioTrack: (audioTrack, bufferDuration) => {
-      player.selectAudioTrack(audioTrack, bufferDuration);
-    },
-    TextTrack: (textTrack) => {
-      player.selectTextTrack(textTrack);
-    },
-  };
-
-  selectors[trackType](track, bufferDuration);
-}
-
-export function disableTrack(player: shaka.Player, trackType: keyof TrackType) {
-  switch (trackType) {
-    case 'VideoTrack':
-    case 'AudioTrack':
-      throw new Error('Cannot deselect video / audio tracks');
-    case 'TextTrack':
-      player.selectTextTrack(null);
-  }
 }

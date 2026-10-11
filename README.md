@@ -4,7 +4,7 @@ Work in progress
 
 Solved:
 
-- [x] Integrate Shaka
+- [x] Integrate hls.js
 - [x] Add hooks for tracks switching
 - [x] Add basic hotkeys and basic subtitle / audio track control
 

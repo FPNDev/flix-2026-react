@@ -1,4 +1,3 @@
-import { useEffectWithPrevious } from '@/hooks/useEffectWithPrevious';
 import { createStore } from '@/utils/store';
 import {
   useEffect,
@@ -6,17 +5,17 @@ import {
   useState,
   useSyncExternalStore,
 } from 'react';
-import type shaka from 'shaka-player';
+import type { VideoSdk } from '../sdk';
 
 type Props<T> = {
-  player: shaka.Player | undefined;
+  player: VideoSdk | undefined;
   events: string[];
-  selector: (player: shaka.Player, evt?: Event) => T;
+  selector: (player: VideoSdk, evt?: Event) => T;
   fallback: T;
 };
 
 /**
- * Subscribes to Shaka player events and exposes the selected value as a store snapshot
+ * Subscribes to video SDK events and exposes the selected value as a store snapshot
  */
 export function usePlayerSubscription<T>({
   player,
@@ -26,19 +25,11 @@ export function usePlayerSubscription<T>({
 }: Props<T>) {
   const [store] = useState(() => createStore<T>(fallback));
 
-  useEffectWithPrevious(
-    ([oldPlayer]) => {
-      if (oldPlayer !== player) {
-        store.set(fallback);
-      }
-    },
-    [player],
-  );
-
   const setValueOnEvent = useEffectEvent((evt: Event) => {
     if (!player) {
       return;
     }
+
     store.set(selector(player, evt));
   });
 
@@ -48,12 +39,12 @@ export function usePlayerSubscription<T>({
     }
 
     for (const eventName of events) {
-      player.addEventListener(eventName, setValueOnEvent);
+      player.video.addEventListener(eventName, setValueOnEvent);
     }
 
     return () => {
       for (const eventName of events) {
-        player.removeEventListener(eventName, setValueOnEvent);
+        player.video.removeEventListener(eventName, setValueOnEvent);
       }
     };
   }, [player, events]);

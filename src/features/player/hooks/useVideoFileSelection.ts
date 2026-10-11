@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { MediaFile } from '../types/mediaFiles.types';
+import type { MediaFile } from '../api/remuxer';
 
 /**
  * Implements listing of media files within a media source

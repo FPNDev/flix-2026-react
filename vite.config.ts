@@ -32,10 +32,6 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: {
         '@': path.resolve(dirName, 'src'),
-        'shaka-player': path.resolve(
-          dirName,
-          'src/vendor/shaka-player.stripped.js',
-        ),
       },
     },
     server: {
@@ -48,9 +44,6 @@ export default defineConfig(({ mode }) => {
     css: {
       modules: { localsConvention: 'camelCase' },
     },
-    optimizeDeps: {
-      include: ['shaka-player'],
-    },
     build: {
       cssMinify: 'lightningcss',
       rolldownOptions: {
@@ -61,16 +54,6 @@ export default defineConfig(({ mode }) => {
                 name: 'react-vendor',
                 test: /node_modules[\\/]react/u,
                 priority: 3,
-              },
-              {
-                name: 'shaka-vendor',
-                test: /shaka-player\.stripped/u,
-                priority: 2,
-              },
-              {
-                name: 'vendor',
-                test: /node_modules/u,
-                priority: 1,
               },
               {
                 name: 'common',

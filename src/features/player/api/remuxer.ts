@@ -1,6 +1,19 @@
 import { handleHttpError } from '@/api/errors';
-import type { FilesResponse } from '../types/mediaFiles.types';
 import { isAbortError } from '@/utils/abort';
+
+export type MediaFile = {
+  index: number;
+  name: string;
+  path: string;
+  length: number;
+  playable: boolean;
+};
+
+type FilesResponse = {
+  hash: string;
+  name: string;
+  files: MediaFile[];
+};
 
 /**
  * Query param the remuxer reads the media source from

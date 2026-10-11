@@ -15,30 +15,6 @@ export const renewAbortController = (
   return abortControllerRef.current;
 };
 
-export const isAbortError = (err: unknown): err is DOMException => {
-  return err instanceof DOMException && err.name === 'AbortError';
-};
-
-export const anyAbortSignal = (signals: AbortSignal[]): AbortSignal => {
-  if ('any' in AbortSignal) {
-    return AbortSignal.any(signals);
-  }
-
-  const controller = new AbortController();
-  for (const signal of signals) {
-    if (signal.aborted) {
-      controller.abort(signal.reason);
-      return controller.signal;
-    }
-    signal.addEventListener(
-      'abort',
-      () => {
-        controller.abort(signal.reason);
-      },
-      {
-        once: true,
-      },
-    );
-  }
-  return controller.signal;
+export const isAbortError = (err: unknown): err is Error => {
+  return err instanceof Error && err.name === 'AbortError';
 };

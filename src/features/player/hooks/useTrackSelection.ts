@@ -1,142 +1,174 @@
-import { useToast } from '@/components/DesignSystem/Toast';
-import type shaka from 'shaka-player';
+import { useToast, type ToastInfo } from '@/components/DesignSystem/Toast';
 import { usePlayerSubscription } from './usePlayerSubscription';
-import { getTracks, isShakaActive } from '../utils/shaka';
-import type { TrackType } from '../types/player.types';
-import { TRACK_SELECTION_TOASTS } from '../constants/trackSelection';
-import { disableTrack, selectTrack } from '../utils/tracks';
+import { getTrackDisplayName } from '../utils/tracks';
+import type { TrackType, VideoSdk } from '../sdk';
 
 type Props<T extends keyof TrackType> = {
-  player: shaka.Player | undefined;
+  player: VideoSdk | undefined;
   trackType: T;
-  bufferDuration?: number;
 };
 
-type SelectedIndex<T> = T extends 'TextTrack' ? number | undefined : number;
-
-type TrackStore<T> = {
-  tracks: T[];
-  selectedTrackIndex: SelectedIndex<T>;
+type MessageGroup = {
+  [key in keyof TrackType]?: (track: TrackType[key]) => ToastInfo;
 };
 
-const TRACKS_EVENTS = ['loaded', 'unloading', 'variantchanged', 'textchanged'];
-const NO_TRACKS: TrackStore<unknown> = { tracks: [], selectedTrackIndex: 0 };
+type DisabledMessageGroup = {
+  [key in keyof TrackType]?: () => ToastInfo;
+};
+
+const TRACK_SELECTION_TOASTS: {
+  disabled: DisabledMessageGroup;
+  activated: MessageGroup;
+} = {
+  disabled: {
+    text: () => ({ text: 'Subtitles disabled', icon: 'subtitles_off' }),
+  },
+  activated: {
+    text: (track) => ({
+      text: `Subtitles changed to ${getTrackDisplayName(track)}`,
+      icon: 'subtitles',
+    }),
+    audio: (track) => ({
+      text: `Audio changed to ${getTrackDisplayName(track)}`,
+      icon: 'queue_music',
+    }),
+  },
+};
+
+const NO_TRACKS: unknown[] = [];
+
+function getTracksByType<T extends 'text' | 'audio'>(
+  player: VideoSdk,
+  type: T,
+): TrackType[T][] {
+  switch (type) {
+    case 'audio':
+      return player.audioTracks() as TrackType[T][];
+    case 'text':
+      return player.textTracks() as TrackType[T][];
+  }
+}
+
+function getTrackByType<T extends 'text' | 'audio'>(player: VideoSdk, type: T) {
+  switch (type) {
+    case 'audio':
+      return player.audioTrack();
+    case 'text':
+      return player.textTrack();
+  }
+}
+
+function selectTrackByType<T extends 'text' | 'audio'>(
+  player: VideoSdk,
+  type: T,
+  trackIndex: number,
+) {
+  switch (type) {
+    case 'audio':
+      player.selectAudioTrack(trackIndex);
+      break;
+    case 'text':
+      player.selectTextTrack(trackIndex);
+      break;
+  }
+}
 
 /**
- * Provides a layer for tracks selection within Shaka player
+ * Provides a layer for tracks selection within the video SDK
  */
 export function useTrackSelection<T extends keyof TrackType>({
   player,
   trackType,
-  bufferDuration,
 }: Props<T>) {
   const { addToast } = useToast();
+  const defaultIndex = trackType === 'text' ? -1 : 0;
 
-  const defaultIndex = (
-    trackType === 'TextTrack' ? undefined : 0
-  ) as SelectedIndex<T>;
-
-  const selector = () => {
-    if (!player || !isShakaActive(player)) {
-      return NO_TRACKS as TrackStore<TrackType[T]>;
+  const getTracks = (_: unknown, evt?: Event) => {
+    if (!player || evt?.type === 'unload') {
+      return NO_TRACKS as TrackType[T][];
     }
 
-    const tracks = getTracks<T>(player, trackType);
-    const index = tracks.findIndex((track) => track.active);
-
-    return {
-      tracks,
-      selectedTrackIndex: index === -1 ? defaultIndex : index,
-    } as TrackStore<TrackType[T]>;
+    return getTracksByType(player, trackType);
   };
 
-  const {
-    snapshot: { tracks, selectedTrackIndex },
-  } = usePlayerSubscription({
+  const getCurrentTrack = (_: unknown, evt?: Event) => {
+    if (!player || evt?.type === 'unload') {
+      return -1;
+    }
+
+    return getTrackByType(player, trackType);
+  };
+
+  const { snapshot: tracks } = usePlayerSubscription({
     player,
-    events: TRACKS_EVENTS,
-    selector,
-    fallback: NO_TRACKS as TrackStore<TrackType[T]>,
+    events: [`${trackType}:updated`, 'unload'],
+    selector: getTracks,
+    fallback: NO_TRACKS as TrackType[T][],
   });
 
-  const select = (selectedIndex: SelectedIndex<T>, showToast = false) => {
+  const { snapshot: selectedTrackIndex } = usePlayerSubscription({
+    player,
+    events: [`${trackType}:selected`, 'unload'],
+    selector: getCurrentTrack,
+    fallback: defaultIndex,
+  });
+
+  const select = (selectedIndex: number) => {
     if (!player || tracks.length === 0) {
       return;
     }
 
-    const newTrack =
-      typeof selectedIndex === 'number' ? tracks[selectedIndex] : undefined;
+    selectTrackByType(player, trackType, selectedIndex);
+  };
 
-    const displayToast = showToast
-      ? (failed?: boolean) => {
-          const toastMessageFn = newTrack
-            ? failed
-              ? TRACK_SELECTION_TOASTS.failed[trackType]
-              : TRACK_SELECTION_TOASTS.activated[trackType]
-            : !failed && TRACK_SELECTION_TOASTS.disabled[trackType];
+  const selectAndNotify = (selectedIndex: number) => {
+    select(selectedIndex);
 
-          if (toastMessageFn) {
-            addToast({
-              variant: failed || !newTrack ? 'danger' : 'accent',
-              ...toastMessageFn(newTrack as TrackType[T]),
-            });
-          }
-        }
-      : () => {};
+    const newTrack = tracks[selectedIndex];
+    const toast = newTrack
+      ? TRACK_SELECTION_TOASTS.activated[trackType]?.(newTrack)
+      : TRACK_SELECTION_TOASTS.disabled[trackType]?.();
 
-    try {
-      if (newTrack) {
-        selectTrack(player, trackType, newTrack, bufferDuration);
-      } else {
-        disableTrack(player, trackType);
-      }
-
-      displayToast();
-    } catch {
-      displayToast(true);
+    if (toast) {
+      addToast({ variant: newTrack ? 'accent' : 'danger', ...toast });
     }
   };
 
   const navigate = (direction: -1 | 1) => {
-    if (
-      (selectedTrackIndex === undefined && trackType !== 'TextTrack') ||
-      tracks.length === 0 ||
-      (trackType !== 'TextTrack' && tracks.length <= 1)
-    ) {
+    if (trackType !== 'text' && tracks.length <= 1) {
       return;
     }
 
-    if (selectedTrackIndex === undefined) {
-      select(direction === 1 ? 0 : tracks.length - 1, true);
+    if (selectedTrackIndex === -1) {
+      selectAndNotify(direction === 1 ? 0 : tracks.length - 1);
       return;
     }
 
     if (
-      (trackType === 'TextTrack' &&
-        selectedTrackIndex === tracks.length - 1 &&
-        direction === 1) ||
-      (selectedTrackIndex === 0 && direction === -1)
+      trackType === 'text' &&
+      ((selectedTrackIndex === tracks.length - 1 && direction === 1) ||
+        (selectedTrackIndex === 0 && direction === -1))
     ) {
-      select(defaultIndex, true);
+      selectAndNotify(defaultIndex);
       return;
     }
 
-    select(
+    selectAndNotify(
       (tracks.length + (selectedTrackIndex as number) + direction) %
         tracks.length,
-      true,
     );
   };
 
-  const disable = (showToast = false) => {
-    select(defaultIndex, showToast);
+  const selectDefault = () => {
+    selectAndNotify(defaultIndex);
   };
 
   return {
     selectedTrackIndex,
     tracks,
     selectTrack: select,
+    selectTrackWithToast: selectAndNotify,
     navigateTracks: navigate,
-    disableTrack: disable,
+    selectDefault,
   };
 }

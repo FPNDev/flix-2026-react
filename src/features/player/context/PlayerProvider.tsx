@@ -7,20 +7,20 @@ import {
 import { usePlayerSession } from '../hooks/usePlayerSession';
 
 export function PlayerProvider({ children }: PropsWithChildren) {
-  const [video, setVideo] = useState<HTMLVideoElement>();
   const [playerContainer, setPlayerContainer] = useState<HTMLElement>();
 
   const {
+    video,
     player,
     isLoading,
-    activeURI,
     targetTime,
-    videoTrack,
+    level,
     audioTracks,
     textTracks,
     selectedAudioTrackIndex,
     selectedTextTrackIndex,
-    playFromURL,
+    attachVideo,
+    load,
     seekBy,
     seekTo,
     selectAudioTrack,
@@ -28,7 +28,7 @@ export function PlayerProvider({ children }: PropsWithChildren) {
     navigateAudioTracks,
     navigateTextTracks,
     disableTextTrack,
-  } = usePlayerSession({ video });
+  } = usePlayerSession();
 
   const focusPlayer = () => {
     if (!playerContainer) {
@@ -42,9 +42,9 @@ export function PlayerProvider({ children }: PropsWithChildren) {
     <PlayerActionsContext
       value={{
         setPlayerContainer,
-        setVideo,
+        attachVideo,
         focusPlayer,
-        playFromURL,
+        load,
         seekBy,
         seekTo,
         selectAudioTrack,
@@ -60,8 +60,7 @@ export function PlayerProvider({ children }: PropsWithChildren) {
           playerContainer,
           player,
           isLoading,
-          activeURI,
-          videoTrack,
+          level,
           audioTracks,
           textTracks,
           selectedAudioTrackIndex,
@@ -75,5 +74,3 @@ export function PlayerProvider({ children }: PropsWithChildren) {
     </PlayerActionsContext>
   );
 }
-
-export default PlayerProvider;

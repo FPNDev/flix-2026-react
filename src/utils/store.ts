@@ -1,4 +1,11 @@
-export function createStore<T>(initial: T) {
+type Store<T> = {
+  subscribe: (listener: () => void) => () => void;
+  getSnapshot: () => T;
+  set: (next: T) => void;
+};
+
+export function createStore<T = undefined>(initial?: T): Store<T>;
+export function createStore<T>(initial: T): Store<T> {
   let snapshot = initial;
   const listeners = new Set<() => void>();
 
