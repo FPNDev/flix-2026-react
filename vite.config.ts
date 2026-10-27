@@ -40,6 +40,7 @@ export default defineConfig(({ mode }) => {
     },
     server: {
       host: process.env.NODE_ENV === 'development' ? false : true,
+      allowedHosts: ['flix.local'],
       https: {
         key: fs.readFileSync(path.resolve(dirName, env.CERT_KEY!)),
         cert: fs.readFileSync(path.resolve(dirName, env.CERT_FILE!)),
