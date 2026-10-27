@@ -2,23 +2,23 @@ import { useEffect } from 'react';
 import { setMediaSessionMetadata } from '@/utils/mediaSession';
 import { getTrackDisplayName } from '../utils/tracks';
 import type { MediaFile } from '../api/remuxer';
-import type { LevelInfo } from '../sdk';
+import type { TrackType } from '../sdk';
 
 type Props = {
-  level: LevelInfo | undefined;
+  videoTrack: TrackType['video'] | undefined;
   currentFile?: MediaFile;
 };
 
-export function useMediaSessionMetadata({ level, currentFile }: Props) {
+export function useMediaSessionMetadata({ videoTrack, currentFile }: Props) {
   useEffect(() => {
-    if (!level || !currentFile) {
+    if (!videoTrack || !currentFile) {
       setMediaSessionMetadata('FLIX');
 
       return;
     }
 
     setMediaSessionMetadata(
-      `${currentFile.name} - ${getTrackDisplayName(level)}`,
+      `${currentFile.name} - ${getTrackDisplayName(videoTrack)}`,
     );
-  }, [level, currentFile]);
+  }, [videoTrack, currentFile]);
 }

@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
+import type { VideoSdk } from '../sdk';
 
 type Props = {
-  video: HTMLVideoElement | undefined;
+  player: VideoSdk | undefined;
   debounceBy?: number;
 };
 
-export function useSeeking({ video, debounceBy = 150 }: Props) {
+export function useSeeking({ player, debounceBy = 150 }: Props) {
+  const video = player?.video;
   const seekTimeout = useRef<number>(0);
   const handleSeekedRef = useRef<() => void>(null);
   const wasPlayingRef = useRef<boolean>(null);
@@ -37,8 +39,8 @@ export function useSeeking({ video, debounceBy = 150 }: Props) {
     setTargetTime(null);
     wasPlayingRef.current = null;
 
-    if (video && haveToPlay) {
-      void video.play();
+    if (player && haveToPlay) {
+      void player.play();
     }
   };
 

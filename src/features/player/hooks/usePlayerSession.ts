@@ -9,6 +9,7 @@ import type {
   PlayerState,
 } from '../context/PlayerContext';
 import { useAutoplayNextEpisode } from './useAutoplayNextEpisode';
+import { useErrorHandling } from './useErrorHandling';
 import { useMediaSessionMetadata } from './useMediaSessionMetadata';
 import { usePlayerSubscription } from './usePlayerSubscription';
 import { useRememberTrack } from './useRememberTrack';
@@ -21,7 +22,7 @@ type PlayerSession = Omit<PlayerState, 'playerContainer'> &
   Omit<PlayerActions, 'setPlayerContainer' | 'focusPlayer'> &
   PlayerSeeking;
 
-const LEVEL_SELECTED_EVENTS = ['level:selected', 'unload'];
+const VIDEO_SELECTED_EVENTS = ['video:selected', 'unload'];
 
 /**
  * Composes the player hooks into a single playback session
@@ -33,11 +34,22 @@ export function usePlayerSession(): PlayerSession {
   const { player, attachVideo } = useVideoSdk();
   const video = player?.video;
 
-  const { load, isLoading, activeURI } = useVideoStartup({
+  const {
+    load: loadVideo,
+    isLoading,
+    activeURI,
+  } = useVideoStartup({
     player,
     autoPlay: true,
   });
-  const { seekBy, seekTo, targetTime } = useSeeking({ video });
+  const currentFile = files[selectedFileIndex];
+  const { load, isRecovering } = useErrorHandling({
+    player,
+    fileName: currentFile?.name,
+    activeURI,
+    load: loadVideo,
+  });
+  const { seekBy, seekTo, targetTime } = useSeeking({ player });
 
   const assetId = activeURI
     ? (new URL(activeURI).searchParams.get(REMUXER_SOURCE_PARAM) ?? '')
@@ -78,27 +90,27 @@ export function usePlayerSession(): PlayerSession {
 
   useAutoplayNextEpisode({ video, navigateFiles });
 
-  const { snapshot: level } = usePlayerSubscription({
+  const videoTrack = usePlayerSubscription({
     player,
-    events: LEVEL_SELECTED_EVENTS,
-    selector: (hls, evt) => {
+    events: VIDEO_SELECTED_EVENTS,
+    selector: (sdk, evt) => {
       if (evt?.type === 'unload') {
         return;
       }
 
-      return hls.levels()[hls.level()];
+      return sdk.videoTracks[sdk.videoTrack];
     },
     fallback: undefined,
   });
 
-  useMediaSessionMetadata({ level, currentFile: files[selectedFileIndex] });
+  useMediaSessionMetadata({ videoTrack, currentFile });
 
   return {
     video,
     player,
-    isLoading,
+    isLoading: isLoading || isRecovering,
     targetTime,
-    level,
+    videoTrack,
     audioTracks,
     textTracks,
     selectedAudioTrackIndex,

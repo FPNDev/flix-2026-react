@@ -1,13 +1,12 @@
-import type { LevelInfo, TrackType } from '../types';
+import { USER_TEXT_KINDS, type TrackType } from '../types';
 
 type Binding = [target: EventTarget, type: string, listener: () => void];
 
-const USER_TEXT_KINDS = new Set<string>(['subtitles', 'captions', 'forced']);
-const NO_LEVELS: LevelInfo[] = [];
+const NO_VIDEO_TRACKS: TrackType['video'][] = [];
 
-const dispatch = (video: HTMLVideoElement, type: string) => {
+function dispatch(video: HTMLVideoElement, type: string) {
   video.dispatchEvent(new CustomEvent(type));
-};
+}
 
 export function attachNativeTracks(video: HTMLVideoElement) {
   let audioTracks: AudioTrack[] = [];
@@ -16,8 +15,8 @@ export function attachNativeTracks(video: HTMLVideoElement) {
   let textInfos: TrackType['text'][] = [];
   let audioTrackIndex = -1;
   let textTrackIndex = -1;
-  let levels = NO_LEVELS;
-  let levelHeight = -1;
+  let videoInfos = NO_VIDEO_TRACKS;
+  let videoTrackHeight = -1;
 
   const onAudioListUpdated = () => {
     audioTracks = [];
@@ -60,13 +59,13 @@ export function attachNativeTracks(video: HTMLVideoElement) {
 
   const onVideoSizeChanged = () => {
     const height = video.videoHeight;
-    if (height === levelHeight) {
+    if (height === videoTrackHeight) {
       return;
     }
-    levelHeight = height;
-    levels = [{ name: height ? `${height}p` : '' }];
-    dispatch(video, 'level:updated');
-    dispatch(video, 'level:selected');
+    videoTrackHeight = height;
+    videoInfos = [{ name: height ? `${height}p` : '' }];
+    dispatch(video, 'video:updated');
+    dispatch(video, 'video:selected');
   };
 
   const onTextSelected = () => {
@@ -80,9 +79,9 @@ export function attachNativeTracks(video: HTMLVideoElement) {
   };
 
   const onEmptied = () => {
-    levelHeight = -1;
-    levels = NO_LEVELS;
-    dispatch(video, 'level:updated');
+    videoTrackHeight = -1;
+    videoInfos = NO_VIDEO_TRACKS;
+    dispatch(video, 'video:updated');
     onAudioListUpdated();
     onTextListUpdated();
   };
@@ -109,27 +108,41 @@ export function attachNativeTracks(video: HTMLVideoElement) {
   }
 
   return {
-    audioTracks: () => audioInfos,
-    audioTrack: () => audioTrackIndex,
-    selectAudioTrack: (index: number) => {
-      for (const [i, track] of audioTracks.entries()) {
-        track.enabled = i === index;
-      }
-      audioTrackIndex = index;
-    },
+    tracks: {
+      get audioTracks() {
+        return audioInfos;
+      },
+      get audioTrack() {
+        return audioTrackIndex;
+      },
+      selectAudioTrack: (index: number) => {
+        for (const [i, track] of audioTracks.entries()) {
+          track.enabled = i === index;
+        }
+        audioTrackIndex = index;
+      },
 
-    textTracks: () => textInfos,
-    textTrack: () => textTrackIndex,
-    selectTextTrack: (index: number) => {
-      for (const [i, track] of textTracks.entries()) {
-        track.mode = i === index ? 'showing' : 'disabled';
-      }
-      textTrackIndex = index;
-    },
+      get textTracks() {
+        return textInfos;
+      },
+      get textTrack() {
+        return textTrackIndex;
+      },
+      selectTextTrack: (index: number) => {
+        for (const [i, track] of textTracks.entries()) {
+          track.mode = i === index ? 'showing' : 'disabled';
+        }
+        textTrackIndex = index;
+      },
 
-    levels: () => levels,
-    level: () => 0,
-    selectLevel: () => {},
+      get videoTracks() {
+        return videoInfos;
+      },
+      get videoTrack() {
+        return 0;
+      },
+      selectVideoTrack: () => {},
+    },
 
     detach: () => {
       for (const [target, type, listener] of bindings) {

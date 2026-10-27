@@ -49,7 +49,5 @@ export function usePlayerSubscription<T>({
     };
   }, [player, events]);
 
-  const snapshot = useSyncExternalStore(store.subscribe, store.getSnapshot);
-
-  return { snapshot };
+  return useSyncExternalStore(store.subscribe, store.getSnapshot);
 }

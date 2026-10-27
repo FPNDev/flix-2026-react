@@ -10,7 +10,7 @@ export function usePlayerControlKeys() {
   const actions = usePlayerActions();
   const fileActions = useMediaFileActions();
 
-  const { video, playerContainer, level } = state;
+  const { video, playerContainer, videoTrack } = state;
 
   const onKeyDown = useEffectEvent((ev: KeyboardEvent) => {
     const { code } = ev;
@@ -21,11 +21,12 @@ export function usePlayerControlKeys() {
       return PLAYER_CONTROL_KEYS[code]({
         state: state as typeof state & {
           video: NonNullable<typeof state.video>;
+          player: NonNullable<typeof state.player>;
           playerContainer: NonNullable<typeof state.playerContainer>;
         },
         actions,
         fileActions,
-        frameRate: level?.frameRate ?? 24,
+        frameRate: videoTrack?.frameRate ?? 24,
         event: ev,
       });
     }
@@ -36,10 +37,12 @@ export function usePlayerControlKeys() {
       return;
     }
 
-    playerContainer.addEventListener('keydown', onKeyDown);
+    playerContainer.addEventListener('keydown', onKeyDown, { capture: true });
 
     return () => {
-      playerContainer.removeEventListener('keydown', onKeyDown);
+      playerContainer.removeEventListener('keydown', onKeyDown, {
+        capture: true,
+      });
     };
   }, [video, playerContainer]);
 }

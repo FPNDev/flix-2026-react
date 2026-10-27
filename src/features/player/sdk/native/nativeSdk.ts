@@ -1,7 +1,27 @@
 import { attachNativeTracks } from './nativeTracks';
-import { VideoError, type VideoSdk } from '../types';
+import { createStallWatchdog } from '../stallWatchdog';
+import type { VideoSdk } from '../types';
+import {
+  playVideo,
+  serverError,
+  VideoError,
+  VideoErrorCode,
+} from '../videoError';
 
 const VARIANT_CODECS = /^#EXT-X-STREAM-INF:(?:.*,)?CODECS="([^"]*)"/gmu;
+
+const MEDIA_ERROR_CODES: Partial<Record<number, VideoErrorCode>> = {
+  [MediaError.MEDIA_ERR_NETWORK]: VideoErrorCode.Network,
+  [MediaError.MEDIA_ERR_DECODE]: VideoErrorCode.Decode,
+  [MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED]: VideoErrorCode.Manifest,
+};
+
+function fromMediaError(error: MediaError | null): VideoError {
+  return new VideoError(
+    (error && MEDIA_ERROR_CODES[error.code]) ?? VideoErrorCode.Other,
+    { cause: error },
+  );
+}
 
 async function loadErrorCause(
   video: HTMLVideoElement,
@@ -12,38 +32,44 @@ async function loadErrorCause(
   try {
     const response = await fetch(url, { signal });
     if (!response.ok) {
-      return VideoError.Other;
+      return serverError(response.status, await response.text(), {
+        cause: video.error,
+      });
     }
 
     playlist = await response.text();
-  } catch {
-    return VideoError.Other;
+  } catch (error) {
+    return new VideoError(VideoErrorCode.Network, { cause: error });
   }
 
   let found = false;
   for (const [, codecs] of playlist.matchAll(VARIANT_CODECS)) {
     if (video.canPlayType(`video/mp4; codecs="${codecs}"`)) {
-      return VideoError.Other;
+      return fromMediaError(video.error);
     }
     found = true;
   }
 
-  return found ? VideoError.UnsupportedCodec : VideoError.Other;
+  return found
+    ? new VideoError(VideoErrorCode.UnsupportedCodec, { cause: video.error })
+    : fromMediaError(video.error);
 }
 
 export function createNativeSdk(video: HTMLVideoElement): VideoSdk {
-  const { detach, ...tracks } = attachNativeTracks(video);
+  const { detach, tracks } = attachNativeTracks(video);
+  const watchdog = createStallWatchdog(video);
 
   let abortLoading: (() => void) | undefined;
 
   const unload = () => {
     abortLoading?.();
+    watchdog.stop();
     video.dispatchEvent(new CustomEvent('unload'));
     video.removeAttribute('src');
     video.load();
   };
 
-  const load = (url: string) => {
+  const load = (url: string, startTime?: number) => {
     const { promise, resolve, reject } = Promise.withResolvers<void>();
 
     unload();
@@ -52,7 +78,11 @@ export function createNativeSdk(video: HTMLVideoElement): VideoSdk {
 
     const onLoad = () => {
       cleanup();
+      if (startTime !== undefined) {
+        video.currentTime = startTime;
+      }
       resolve();
+      watchdog.start();
     };
 
     const onLoadError = async () => {
@@ -74,7 +104,7 @@ export function createNativeSdk(video: HTMLVideoElement): VideoSdk {
     abortLoading = () => {
       cleanup();
       controller.abort();
-      reject(VideoError.Interrupted);
+      reject(new VideoError(VideoErrorCode.Interrupted));
     };
 
     video.addEventListener('loadedmetadata', onLoad);
@@ -84,18 +114,28 @@ export function createNativeSdk(video: HTMLVideoElement): VideoSdk {
     return promise;
   };
 
+  const onError = () => {
+    if (!abortLoading) {
+      watchdog.stopUntilPlaying();
+      video.dispatchEvent(
+        new CustomEvent('sdk:error', { detail: fromMediaError(video.error) }),
+      );
+    }
+  };
+
+  video.addEventListener('error', onError);
+
   const destroy = () => {
     unload();
     detach();
+    video.removeEventListener('error', onError);
   };
 
-  return {
+  return Object.assign(tracks, {
     load,
+    play: () => playVideo(video),
     unload,
     destroy,
-
-    ...tracks,
-
     video,
-  };
+  });
 }

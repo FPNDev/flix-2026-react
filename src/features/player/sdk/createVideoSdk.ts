@@ -1,12 +1,17 @@
-import Hls from 'hls.js';
-import { createHlsSdk } from './hls/hlsSdk';
-import { isCacheSupported } from './hls/cache';
+import shaka from 'shaka-player';
 import { createNativeSdk } from './native/nativeSdk';
+import { createShakaSdk } from './shaka/shakaSdk';
 import type { VideoSdk } from './types';
 
+shaka.polyfill.installAll();
+
+const SHAKA_SUPPORTED =
+  shaka.Player.isBrowserSupported() &&
+  ('MediaSource' in window || 'ManagedMediaSource' in window);
+
 export function createVideoSdk(video: HTMLVideoElement): VideoSdk | undefined {
-  if (Hls.isSupported()) {
-    return createHlsSdk(video, { cache: isCacheSupported() });
+  if (SHAKA_SUPPORTED) {
+    return createShakaSdk(video);
   }
 
   if (video.canPlayType('application/vnd.apple.mpegurl')) {

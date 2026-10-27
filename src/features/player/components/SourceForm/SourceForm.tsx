@@ -15,7 +15,6 @@ import {
 } from '../../context/MediaFilesContext';
 import { renewAbortController } from '@/utils/abort';
 import { TrackSelectors } from '../TrackSelectors';
-import { VideoError } from '../../sdk';
 
 const getManifestURL = (sourceURI: string, fileIndex: number) => {
   return remuxerURI('m3u8', {
@@ -86,25 +85,16 @@ export function SourceForm() {
 
     try {
       await load(url);
+    } catch {
+      return;
+    }
 
-      if (file) {
-        addToast({
-          icon: 'playlist_play',
-          text: `Playing ` + file.name,
-          variant: 'success',
-        });
-      }
-    } catch (err) {
-      if (file && err !== VideoError.Interrupted) {
-        addToast({
-          icon: 'play_disabled',
-          text:
-            err === VideoError.UnsupportedCodec
-              ? 'Video codec is not supported by your browser'
-              : `Cannot play ` + file.name,
-          variant: 'danger',
-        });
-      }
+    if (file) {
+      addToast({
+        icon: 'playlist_play',
+        text: `Playing ` + file.name,
+        variant: 'success',
+      });
     }
   });
 

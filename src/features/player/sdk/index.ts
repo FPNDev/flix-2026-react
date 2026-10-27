@@ -1,3 +1,3 @@
 export { createVideoSdk } from './createVideoSdk';
-export { VideoError } from './types';
-export type { LevelInfo, TrackType, VideoSdk } from './types';
+export { VideoError, VideoErrorCode } from './videoError';
+export type { TrackType, VideoSdk } from './types';

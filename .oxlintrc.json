@@ -35,6 +35,7 @@
     "dist/*",
     "dev-dist/*",
     "scripts/*",
-    "pre-commit/*"
+    "pre-commit/*",
+    "src/vendor/*"
   ]
 }

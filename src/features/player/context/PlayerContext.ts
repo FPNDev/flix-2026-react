@@ -1,6 +1,6 @@
 import { useContextOrThrow } from '@/hooks/useContextOrThrow';
 import { createContext, type RefCallback } from 'react';
-import type { LevelInfo, TrackType, VideoSdk } from '../sdk';
+import type { TrackType, VideoSdk } from '../sdk';
 
 export type PlayerSeeking = {
   targetTime: number | null;
@@ -11,7 +11,7 @@ export type PlayerState = {
   playerContainer: HTMLElement | undefined;
   player: VideoSdk | undefined;
   isLoading: boolean;
-  level: LevelInfo | undefined;
+  videoTrack: TrackType['video'] | undefined;
   audioTracks: TrackType['audio'][];
   textTracks: TrackType['text'][];
   selectedAudioTrackIndex: number;

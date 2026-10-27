@@ -3,7 +3,7 @@ import { usePlayerSubscription } from './usePlayerSubscription';
 import { getTrackDisplayName } from '../utils/tracks';
 import type { TrackType, VideoSdk } from '../sdk';
 
-type Props<T extends keyof TrackType> = {
+type Props<T extends 'audio' | 'text'> = {
   player: VideoSdk | undefined;
   trackType: T;
 };
@@ -43,18 +43,18 @@ function getTracksByType<T extends 'text' | 'audio'>(
 ): TrackType[T][] {
   switch (type) {
     case 'audio':
-      return player.audioTracks() as TrackType[T][];
+      return player.audioTracks as TrackType[T][];
     case 'text':
-      return player.textTracks() as TrackType[T][];
+      return player.textTracks as TrackType[T][];
   }
 }
 
 function getTrackByType<T extends 'text' | 'audio'>(player: VideoSdk, type: T) {
   switch (type) {
     case 'audio':
-      return player.audioTrack();
+      return player.audioTrack;
     case 'text':
-      return player.textTrack();
+      return player.textTrack;
   }
 }
 
@@ -76,7 +76,7 @@ function selectTrackByType<T extends 'text' | 'audio'>(
 /**
  * Provides a layer for tracks selection within the video SDK
  */
-export function useTrackSelection<T extends keyof TrackType>({
+export function useTrackSelection<T extends 'audio' | 'text'>({
   player,
   trackType,
 }: Props<T>) {
@@ -99,14 +99,14 @@ export function useTrackSelection<T extends keyof TrackType>({
     return getTrackByType(player, trackType);
   };
 
-  const { snapshot: tracks } = usePlayerSubscription({
+  const tracks = usePlayerSubscription({
     player,
     events: [`${trackType}:updated`, 'unload'],
     selector: getTracks,
     fallback: NO_TRACKS as TrackType[T][],
   });
 
-  const { snapshot: selectedTrackIndex } = usePlayerSubscription({
+  const selectedTrackIndex = usePlayerSubscription({
     player,
     events: [`${trackType}:selected`, 'unload'],
     selector: getCurrentTrack,

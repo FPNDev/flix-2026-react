@@ -30,6 +30,7 @@ type ActionParams = {
   state: PlayerState & {
     playerContainer: NonNullable<PlayerState['playerContainer']>;
     video: NonNullable<PlayerState['video']>;
+    player: NonNullable<PlayerState['player']>;
   };
   actions: PlayerActions;
   fileActions: MediaFileActions;
@@ -38,24 +39,23 @@ type ActionParams = {
 
 type KeyActions = Record<string, (params: ActionParams) => unknown>;
 
+function toggleFullscreenKey({
+  state: { playerContainer },
+  event: { repeat },
+}: ActionParams) {
+  if (repeat) {
+    return;
+  }
+
+  void toggleFullscreen(playerContainer);
+}
+
 /**
  * Video player general stateless hotkeys (advanced stateful ones are part of usePlayerControlKeys directly)
  */
 export const PLAYER_CONTROL_KEYS: KeyActions = {
-  KeyF: ({ state: { playerContainer }, event: { repeat } }) => {
-    if (repeat) {
-      return;
-    }
-
-    void toggleFullscreen(playerContainer);
-  },
-  Enter: ({ state: { playerContainer }, event: { repeat } }) => {
-    if (repeat) {
-      return;
-    }
-
-    void toggleFullscreen(playerContainer);
-  },
+  KeyF: toggleFullscreenKey,
+  Enter: toggleFullscreenKey,
   KeyC: ({ state, actions, event: { shiftKey, altKey, repeat } }) => {
     if (repeat || state.textTracks.length === 0) {
       return;
@@ -101,13 +101,13 @@ export const PLAYER_CONTROL_KEYS: KeyActions = {
 
     video.muted = !video.muted;
   },
-  Space: ({ state: { video } }) => {
+  Space: ({ state: { video, player } }) => {
     if (
       video.paused &&
       video.duration &&
       video.readyState >= video.HAVE_CURRENT_DATA
     ) {
-      void video.play();
+      void player.play();
     } else {
       video.pause();
     }

@@ -1,5 +1,5 @@
 import { LANGUAGE_NAMES } from '@/constants/languageNames';
-import type { LevelInfo, TrackType } from '../sdk';
+import type { TrackType } from '../sdk';
 
 type CompareFields = {
   [key in keyof TrackType]?: {
@@ -20,7 +20,7 @@ const TRACK_COMPARE_FIELDS: CompareFields = {
 };
 
 export function getTrackDisplayName(
-  track: TrackType[keyof TrackType] | LevelInfo,
+  track: TrackType[keyof TrackType],
   withLanguage = false,
 ) {
   const trackLabel = track.name?.trim() ?? '';
