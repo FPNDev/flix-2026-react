@@ -44,6 +44,21 @@ export default defineConfig(({ mode }) => {
         key: fs.readFileSync(path.resolve(dirName, env.CERT_KEY!)),
         cert: fs.readFileSync(path.resolve(dirName, env.CERT_FILE!)),
       },
+      proxy: {
+        '/aurora-proxy': {
+          target: 'https://account.aurora-ws.com',
+          changeOrigin: true,
+          rewrite: (url) => url.replace(/^\/aurora-proxy/u, ''),
+          headers: { 'User-Agent': 'FlixAuroraPOC/0.1 (+https://localhost)' },
+          configure: (proxy) => {
+            proxy.on('proxyReq', (proxyReq) => {
+              proxyReq.removeHeader('origin');
+              proxyReq.removeHeader('referer');
+              proxyReq.removeHeader('cookie');
+            });
+          },
+        },
+      },
     },
     css: {
       modules: { localsConvention: 'camelCase' },
