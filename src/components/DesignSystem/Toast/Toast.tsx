@@ -53,8 +53,8 @@ export function Toast({ toast }: Props) {
         startRemovalTimeout(toast);
       }}
     >
-      <Icon className={clsx(classes.icon, 'icon')} icon={toast.icon} />
-      <div className={clsx(classes.text)} role="status" aria-atomic>
+      <Icon className={classes.icon} icon={toast.icon} />
+      <div className={classes.text} role="status" aria-atomic>
         {toast.text}
       </div>
       {toast.action === ToastAction.Close && (
@@ -68,12 +68,7 @@ export function Toast({ toast }: Props) {
         </button>
       )}
       {toast.action === ToastAction.Button && (
-        <button
-          className="btn btn--ghost btn--sm"
-          onClick={() => toast.onAction(toast)}
-        >
-          {toast.btnText}
-        </button>
+        <button onClick={() => toast.onAction(toast)}>{toast.btnText}</button>
       )}
     </div>
   );

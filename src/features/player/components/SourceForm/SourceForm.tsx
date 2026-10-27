@@ -110,10 +110,7 @@ export function SourceForm() {
   }, [manifestURL]);
 
   return (
-    <form
-      className={clsx(classes.controlForm, 't-body-lg')}
-      onSubmit={submitForm}
-    >
+    <form className={clsx(classes.controlForm)} onSubmit={submitForm}>
       <input
         name="sourceURI"
         placeholder="Source URI"
@@ -121,7 +118,7 @@ export function SourceForm() {
         ref={sourceInputRef}
       />
       <TrackSelectors />
-      <button className="btn btn--lg btn--primary">
+      <button>
         <Icon as="span" icon="play_arrow" size="xl" variant="fill" />
       </button>
     </form>
