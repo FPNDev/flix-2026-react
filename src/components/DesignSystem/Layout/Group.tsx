@@ -32,6 +32,7 @@ export function Group<T extends React.ElementType = 'div'>({
     ...(spacing ? [classes[`sp-${spacing}`]] : []),
     ...(equal ? [classes.equal] : []),
   ]);
+
   return (
     <Component
       className={classNameBuilt}

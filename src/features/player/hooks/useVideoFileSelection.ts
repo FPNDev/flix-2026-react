@@ -26,6 +26,7 @@ export function useVideoFileSelection() {
       0,
       Math.min(files.length - 1, selectedFileIndex + direction),
     );
+
     if (nextIndex === selectedFileIndex) {
       return;
     }

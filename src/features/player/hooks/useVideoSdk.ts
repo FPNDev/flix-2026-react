@@ -19,6 +19,7 @@ export function useVideoSdk() {
         text: 'Browser does not support playback',
         variant: 'danger',
       });
+
       return;
     }
 

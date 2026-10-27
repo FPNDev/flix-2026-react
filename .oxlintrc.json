@@ -1,6 +1,7 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
   "plugins": ["react", "typescript", "oxc", "unicorn"],
+  "jsPlugins": ["@stylistic/eslint-plugin"],
   "options": {
     "typeAware": true
   },
@@ -12,6 +13,10 @@
   "rules": {
     "react/exhaustive-deps": "off",
     "curly": ["error", "all"],
+    "@stylistic/padding-line-between-statements": [
+      "error",
+      { "blankLine": "always", "prev": "*", "next": "return" }
+    ],
     "unicorn/no-array-for-each": "error",
     "only-throw-error": "off",
     "strict-void-return": "off",

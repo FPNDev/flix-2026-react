@@ -141,6 +141,7 @@ export function useTrackSelection<T extends keyof TrackType>({
 
     if (selectedTrackIndex === -1) {
       selectAndNotify(direction === 1 ? 0 : tracks.length - 1);
+
       return;
     }
 
@@ -150,6 +151,7 @@ export function useTrackSelection<T extends keyof TrackType>({
         (selectedTrackIndex === 0 && direction === -1))
     ) {
       selectAndNotify(defaultIndex);
+
       return;
     }
 

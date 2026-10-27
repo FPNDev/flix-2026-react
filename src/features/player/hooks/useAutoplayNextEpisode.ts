@@ -27,6 +27,7 @@ export function useAutoplayNextEpisode({ video, navigateFiles }: Props) {
     };
 
     video.addEventListener('ended', onEnded);
+
     return () => {
       video.removeEventListener('ended', onEnded);
     };

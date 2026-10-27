@@ -22,6 +22,7 @@ export function Container<T extends React.ElementType = 'div'>({
     classes.container,
     ...(narrow ? [classes.narrow] : []),
   ]);
+
   return (
     <Component
       className={classNameBuilt}
