@@ -200,7 +200,6 @@ export function createShakaSdk(video: HTMLVideoElement): VideoSdk {
 
   const destroy = () => {
     reset(new VideoError(VideoErrorCode.Interrupted));
-    cache?.destroy();
     void player.destroy();
   };
 

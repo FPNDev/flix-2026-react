@@ -1,34 +1,42 @@
 export const CACHE_SUPPORTED = 'caches' in self;
 
 const EVICT_COUNT = 5;
-const CACHE_PREFIX = 'segments-';
+const CACHE_NAME = 'segments';
+const LOCKS_SUPPORTED = 'locks' in navigator;
 
-async function sweep(ownName: string) {
-  for (const name of await caches.keys()) {
-    if (name.startsWith(CACHE_PREFIX) && name !== ownName) {
-      await navigator.locks.request(name, { ifAvailable: true }, (lock) =>
-        lock ? caches.delete(name) : undefined,
-      );
-    }
-  }
+function deleteIfUnused() {
+  return navigator.locks.request(CACHE_NAME, { ifAvailable: true }, (lock) =>
+    lock ? caches.delete(CACHE_NAME) : undefined,
+  );
 }
 
 export function createSegmentStore() {
   let cacheHandle: Cache | undefined;
 
-  const cacheName = `${CACHE_PREFIX}${crypto.randomUUID()}`;
   const cachedUrls = new Set<string>();
   const servedUrls = new Set<string>();
+  const { promise: held, resolve: markHeld } = Promise.withResolvers<void>();
   const { promise: released, resolve: releaseLock } =
     Promise.withResolvers<void>();
 
-  if ('locks' in navigator) {
-    navigator.locks.request(cacheName, () => released).catch(() => {});
-    sweep(cacheName).catch(() => {});
+  if (LOCKS_SUPPORTED) {
+    deleteIfUnused().catch(() => {});
+    navigator.locks
+      .request(CACHE_NAME, { mode: 'shared' }, () => {
+        markHeld();
+
+        return released;
+      })
+      .then(deleteIfUnused)
+      .catch(() => {});
+  } else {
+    markHeld();
   }
 
   const getCacheHandle = async () => {
-    return (cacheHandle ??= await caches.open(cacheName));
+    await held;
+
+    return (cacheHandle ??= await caches.open(CACHE_NAME));
   };
 
   const writeCache = async (
@@ -91,13 +99,22 @@ export function createSegmentStore() {
     servedUrls.add(url);
   };
 
-  const clear = () => {
-    cacheHandle = undefined;
-    cachedUrls.clear();
-    servedUrls.clear();
-    caches.delete(cacheName).catch(() => {});
-    releaseLock();
-  };
+  window.addEventListener('pagehide', (event) => {
+    if (event.persisted) {
+      return;
+    }
+    if (LOCKS_SUPPORTED) {
+      releaseLock();
+    } else {
+      caches.delete(CACHE_NAME).catch(() => {});
+    }
+  });
 
-  return { has, match, put, clear, markServed };
+  return { has, match, put, markServed };
+}
+
+let store: ReturnType<typeof createSegmentStore> | undefined;
+
+export function ensureSegmentStore() {
+  return (store ??= createSegmentStore());
 }

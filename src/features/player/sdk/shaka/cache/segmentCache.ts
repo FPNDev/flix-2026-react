@@ -1,7 +1,7 @@
 import shaka from 'shaka-player';
 import { isClientError } from '../shakaErrors';
 import { routeRequest } from './cachingScheme';
-import { createSegmentStore } from './segmentStore';
+import { ensureSegmentStore } from './segmentStore';
 import { createSharedFetches } from './sharedFetches';
 
 type Chain = {
@@ -36,7 +36,7 @@ export function createSegmentCache(
   player: shaka.Player,
   onStorageError: (error: unknown) => void,
 ) {
-  const store = createSegmentStore();
+  const store = ensureSegmentStore();
   const { join } = createSharedFetches(store, onStorageError);
   const chains = new Map<string, Chain>();
 
@@ -65,6 +65,20 @@ export function createSegmentCache(
     }
   };
 
+  const isCached = async (url: string) => {
+    if (store.has(url)) {
+      return true;
+    }
+
+    try {
+      return (await store.match(url)) !== undefined;
+    } catch (error: unknown) {
+      onStorageError(error);
+
+      return false;
+    }
+  };
+
   const runChain = async (chain: Chain) => {
     const { stream, retryParameters, controller } = chain;
     const { signal } = controller;
@@ -76,7 +90,7 @@ export function createSegmentCache(
       }
 
       const [url] = reference.getUris();
-      if (url && !store.has(url)) {
+      if (url && !(await isCached(url))) {
         const fetched = await prefetch(url, retryParameters, signal);
         if (!fetched) {
           chain.failed = true;
@@ -127,26 +141,24 @@ export function createSegmentCache(
     request: shaka.extern.Request,
     signal: AbortSignal,
   ): Promise<shaka.extern.Response> => {
-    if (store.has(uri)) {
-      try {
-        const cached = await store.match(uri);
-        if (cached) {
-          const data = await cached.arrayBuffer();
-          store.markServed(uri);
+    try {
+      const cached = await store.match(uri);
+      if (cached) {
+        const data = await cached.arrayBuffer();
+        store.markServed(uri);
 
-          return {
-            uri,
-            originalUri: uri,
-            data,
-            status: cached.status,
-            headers: Object.fromEntries(cached.headers),
-            fromCache: true,
-            originalRequest: request,
-          };
-        }
-      } catch (error: unknown) {
-        onStorageError(error);
+        return {
+          uri,
+          originalUri: uri,
+          data,
+          status: cached.status,
+          headers: Object.fromEntries(cached.headers),
+          fromCache: true,
+          originalRequest: request,
+        };
       }
+    } catch (error: unknown) {
+      onStorageError(error);
     }
 
     const { response, stored } = await join(
@@ -197,7 +209,6 @@ export function createSegmentCache(
   };
 
   player.getNetworkingEngine()?.registerRequestFilter(requestFilter);
-  window.addEventListener('pagehide', store.clear);
 
   const abort = () => {
     for (const chain of chains.values()) {
@@ -206,10 +217,5 @@ export function createSegmentCache(
     chains.clear();
   };
 
-  const destroy = () => {
-    store.clear();
-    window.removeEventListener('pagehide', store.clear);
-  };
-
-  return { abort, destroy };
+  return { abort };
 }
